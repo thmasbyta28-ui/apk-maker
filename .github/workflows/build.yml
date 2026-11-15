@@ -166,7 +166,11 @@ jobs:
                   if (fcb != null) fcb.onReceiveValue(null);
                   fcb = cb;
                   try {
-                    startActivityForResult(p.createIntent(), FC);
+                    Intent it = new Intent(Intent.ACTION_GET_CONTENT);
+                    it.addCategory(Intent.CATEGORY_OPENABLE);
+                    it.setType("*/*");
+                    if (p.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE) it.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    startActivityForResult(it, FC);
                   } catch (Exception e) {
                     fcb = null;
                     cb.onReceiveValue(null);
