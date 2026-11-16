@@ -1,0 +1,45 @@
+name: Build APK
+on:
+  push:
+    branches: ["apk-build"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: دریافت کد
+        uses: actions/checkout@v4
+      - name: نصب Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: نصب Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: نصب Android SDK
+        uses: android-actions/setup-android@v3
+      - name: ساخت APK
+        run: bash .apkbuilder/build.sh
+      - name: ذخیره APK در Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-apk
+          path: output/app.apk
+      - name: انتشار APK در شاخه apk-output
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p /tmp/pub
+          cp output/app.apk /tmp/pub/app.apk
+          cd /tmp/pub
+          git init -q -b apk-output
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add app.apk
+          git commit -qm "APK build"
+          git push -f "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" apk-output

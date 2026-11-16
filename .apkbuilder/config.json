@@ -1,0 +1,8 @@
+{
+  "appName": "CutLab Studio Pro v2",
+  "appId": "com.example.cutlabstudioprov2",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "iconBg": "#ffffff",
+  "mode": "web"
+}
