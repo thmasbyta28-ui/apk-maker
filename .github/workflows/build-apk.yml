@@ -21,8 +21,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - name: نصب Android SDK
-        uses: android-actions/setup-android@v3
       - name: ساخت APK
         run: bash .apkbuilder/build.sh
       - name: ذخیره APK در Artifacts

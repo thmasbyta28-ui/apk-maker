@@ -3,6 +3,6 @@
   "appId": "com.example.cutlabstudioprov2",
   "versionName": "1.0.0",
   "versionCode": 1,
-  "iconBg": "#ffffff",
+  "iconBg": "#000000",
   "mode": "web"
 }
