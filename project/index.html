@@ -1,1300 +1,145 @@
-<!doctype html>
-<html lang="fa" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>CutLab Studio Pro</title>
+<title>ربات پرنده</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap">
 <style>
-:root {
-  --bg: #0b0d12; --panel: #151922; --panel2: #1c222d; --line: #2b3443;
-  --text: #f3f5fa; --muted: #9aa6b8; --accent: #9b87ff; --accent2: #67e8c1; --danger: #ff6e82;
-}
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.5 Tahoma, "Segoe UI", Arial, sans-serif; }
-button, input, select, textarea { font: inherit; color: inherit; }
-button { border: 1px solid var(--line); background: #252c38; border-radius: 8px; padding: 6px 11px; cursor: pointer; }
-button:hover:not(:disabled) { background: #2f3847; }
-button:disabled { opacity: .4; cursor: default; }
-button.primary { background: var(--accent); color: #120d2b; border-color: transparent; font-weight: 700; }
-button.primary:hover:not(:disabled) { background: #b0a0ff; }
-button.danger { color: var(--danger); }
-button.small { padding: 2px 8px; font-size: 12px; }
-input, select, textarea { background: #0f131a; border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; width: 100%; }
-input[type=range] { padding: 0; accent-color: var(--accent); }
-input[type=color] { padding: 1px 3px; height: 30px; }
-textarea { resize: vertical; }
-.muted { color: var(--muted); font-weight: 400; }
-
-.app { height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
-.top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--panel); }
-.brand { font-size: 15px; }
-.badge { background: var(--accent); color: #120d2b; border-radius: 6px; padding: 0 6px; font-size: 10px; font-weight: 700; }
-.spacer { flex: 1; }
-
-.layout { flex: 1; min-height: 0; display: grid; grid-template-columns: 230px minmax(0, 1fr) 290px; gap: 8px; padding: 8px; }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; min-height: 0; min-width: 0; overflow: hidden; }
-.panelhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); font-weight: 700; }
-.scrollbody { overflow: auto; padding: 8px; flex: 1; min-height: 0; }
-.center { display: flex; flex-direction: column; gap: 8px; min-height: 0; min-width: 0; }
-.preview { flex: 1; min-height: 200px; }
-.timeline { flex: 0 0 auto; height: min(330px, 44vh); }
-
-.media-list { display: flex; flex-direction: column; gap: 6px; }
-.media { display: flex; align-items: center; gap: 6px; background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 5px; }
-.media.missing { border-color: var(--danger); }
-.mthumb { width: 38px; height: 38px; flex: none; border-radius: 6px; background: #0f131a; display: grid; place-items: center; overflow: hidden; color: var(--accent2); }
-.mthumb img { width: 100%; height: 100%; object-fit: cover; }
-.mname { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.mname b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-.mname small { color: var(--muted); font-size: 11px; }
-.media.missing .mname small { color: var(--danger); }
-.help { color: var(--muted); font-size: 12px; padding: 6px 2px; line-height: 1.8; }
-
-.stage { flex: 1; min-height: 0; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.stage canvas { max-width: 100%; max-height: 100%; background: #000; }
-.transport { direction: ltr; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; padding: 7px; border-top: 1px solid var(--line); }
-.timecode { font-family: ui-monospace, Consolas, monospace; direction: ltr; min-width: 130px; text-align: center; }
-.sizesel { width: auto; padding: 2px 6px; font-size: 12px; direction: ltr; }
-
-.tltools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
-.tltools .sep { width: 1px; height: 20px; background: var(--line); margin: 0 2px; }
-.tl { overflow: auto; direction: ltr; position: relative; flex: 1; min-height: 0; background: #10131a; }
-.tl-inner { position: relative; min-height: 100%; }
-.ruler-row { display: flex; position: sticky; top: 0; z-index: 6; background: #10131a; }
-.corner { flex: none; width: 86px; position: sticky; left: 0; z-index: 7; background: #10131a; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
-.ruler { flex: none; height: 24px; position: relative; border-bottom: 1px solid var(--line); cursor: col-resize; user-select: none; }
-.ruler span { position: absolute; top: 5px; font-size: 10px; color: var(--muted); padding-left: 4px; border-left: 1px solid var(--line); height: 19px; pointer-events: none; }
-.track { display: flex; height: 44px; border-bottom: 1px solid #1d2430; }
-.tlabel { flex: none; width: 86px; position: sticky; left: 0; z-index: 4; background: var(--panel2); border-right: 1px solid var(--line); direction: rtl; display: flex; align-items: center; justify-content: space-between; gap: 2px; padding: 0 5px; font-size: 11px; }
-.tlabel .tbtns { display: flex; gap: 1px; }
-.tlabel button { padding: 0 3px; font-size: 12px; border: 0; background: transparent; }
-.tlabel button.off { opacity: .35; }
-.tarea { flex: none; position: relative; height: 44px; cursor: col-resize; }
-.clip { position: absolute; top: 4px; height: 36px; border-radius: 7px; background: linear-gradient(#5b49c9, #4638a3); border: 1px solid #8e7dff; color: #fff; padding: 0 9px; overflow: hidden; display: flex; align-items: center; cursor: grab; user-select: none; touch-action: none; }
-.clip.audio { background: linear-gradient(#17826a, #0f6350); border-color: #4fd9b3; }
-.clip.sub { background: linear-gradient(#a8741a, #825a14); border-color: #e8b04e; }
-.clip.image { background: linear-gradient(#2f6fb5, #25568d); border-color: #6aaaf0; }
-.clip.text { background: linear-gradient(#a8467e, #823562); border-color: #ee86bd; }
-.clip.missing { background: repeating-linear-gradient(45deg, #5a2330, #5a2330 8px, #3a1620 8px, #3a1620 16px); border-color: var(--danger); }
-.clip.selected { outline: 2px solid #fff; z-index: 3; }
-.clip .cl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; pointer-events: none; direction: rtl; }
-.handle { position: absolute; top: 0; bottom: 0; width: 8px; cursor: ew-resize; background: rgba(255, 255, 255, .18); }
-.handle.l { left: 0; }
-.handle.r { right: 0; }
-.playline { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--danger); z-index: 8; pointer-events: none; }
-.playline::before { content: ""; position: absolute; top: 0; left: -5px; border: 6px solid transparent; border-top-color: var(--danger); }
-
-.field { margin-bottom: 9px; }
-.field label { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; margin-bottom: 3px; }
-.field label b { color: var(--text); font-weight: 400; }
-.notice { color: var(--muted); padding: 14px 6px; line-height: 1.9; }
-.propactions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-.sec { margin: 12px 0 6px; font-size: 11px; color: var(--accent2); border-bottom: 1px solid var(--line); padding-bottom: 2px; }
-
-.toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #263041; border: 1px solid var(--line); padding: 9px 16px; border-radius: 10px; display: none; z-index: 50; max-width: 90vw; }
-.modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); display: flex; align-items: center; justify-content: center; z-index: 40; padding: 14px; }
-.modal[hidden] { display: none; }
-.modal .box { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; width: min(430px, 100%); }
-.modal h3 { margin: 0 0 12px; }
-.bar { height: 10px; background: #0f131a; border-radius: 6px; overflow: hidden; margin: 10px 0; }
-.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-.row2 { display: flex; gap: 8px; margin-top: 12px; }
-.dropping::after { content: "فایل‌ها را اینجا رها کن"; position: fixed; inset: 0; background: rgba(155, 135, 255, .25); border: 3px dashed var(--accent); display: grid; place-items: center; font-size: 22px; z-index: 60; pointer-events: none; }
-
-@media (max-width: 1000px) {
-  .app { height: auto; min-height: 100dvh; }
-  .layout { display: flex; flex-direction: column; }
-  .center { order: 1; }
-  .right { order: 2; max-height: none; }
-  .left { order: 3; max-height: 260px; }
-  .stage { height: 42vh; flex: none; }
-  .preview { flex: none; }
-  .timeline { height: 320px; }
-}
+  /* Layout: header with gem counter, then either a menu panel (menu, levels, shop, result) or the game stage with touch pad. */
+  :root {
+    --bg: #e8ecf2; --fg: #1b2330; --muted: #5b6678; --panel: #f6f8fb; --line: #c9d1dd;
+    --accent: #2f6bff; --accent-fg: #ffffff; --gem: #0a8fb0; --star: #e0a100; --off: #c4ccd8;
+    --display: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f141b; --fg: #e6ebf3; --muted: #93a0b4; --panel: #18202b; --line: #2a3544;
+      --accent: #5b8bff; --accent-fg: #0b1220; --gem: #7df0ff; --star: #ffd45a; --off: #2e3a4b;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f141b; --fg: #e6ebf3; --muted: #93a0b4; --panel: #18202b; --line: #2a3544;
+    --accent: #5b8bff; --accent-fg: #0b1220; --gem: #7df0ff; --star: #ffd45a; --off: #2e3a4b;
+    color-scheme: dark;
+  }
+  body {
+    background: var(--bg); color: var(--fg); font-family: var(--display);
+    padding-block: 16px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .app { max-width: 940px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 { font-size: 1.4rem; font-weight: 800; margin: 0; }
+  h2 { margin: 0; font-size: 1.35rem; font-weight: 800; text-wrap: balance; }
+  .gemchip { display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .gemchip i { width: 12px; height: 12px; background: var(--gem); transform: rotate(45deg); border-radius: 2px; display: block; }
+  .screen { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .screen[hidden] { display: none !important; }
+  .stage { border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #101826; line-height: 0; }
+  canvas { display: block; }
+  #cv { width: 100%; height: auto; aspect-ratio: 800 / 450; touch-action: none; }
+  .btn {
+    font-family: var(--display); font-size: 0.95rem; font-weight: 600; padding: 10px 18px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn:focus-visible, .lvl:focus-visible, .pad button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .hero { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+  .hero canvas, .shopTop canvas { width: 240px; max-width: 100%; height: auto; aspect-ratio: 240 / 170; border-radius: 10px; flex: none; }
+  .heroText { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  .heroText p, .hint2, .keys { margin: 0; color: var(--muted); line-height: 1.8; text-wrap: pretty; }
+  .keys { font-size: 0.85rem; }
+  .hint2 { font-size: 0.88rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 10px; }
+  .lvl {
+    position: relative; font-family: var(--display); display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 10px 4px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer;
+  }
+  .lvl b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+  .lvl.boss { border-color: #e5484d; }
+  .lvl em { position: absolute; top: -8px; font-style: normal; font-size: 0.7rem; background: #e5484d; color: #fff; padding: 0 8px; border-radius: 999px; }
+  .lvl:disabled { opacity: 0.5; cursor: not-allowed; }
+  .stars { font-size: 0.8rem; letter-spacing: 1px; white-space: nowrap; }
+  .stars i, .big i { font-style: normal; color: var(--off); }
+  .stars i.on, .big i.on { color: var(--star); }
+  .big { font-size: 2rem; text-align: center; letter-spacing: 6px; }
+  .shopTop { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+  .have { display: flex; flex-direction: column; gap: 4px; }
+  .have span { color: var(--muted); font-size: 0.9rem; }
+  .have b { font-size: 2rem; color: var(--gem); font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .have small { color: var(--muted); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .card { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .card.wp { border-color: var(--accent); }
+  .card p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+  .ch { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .ch span { color: var(--muted); font-size: 0.82rem; }
+  .pips { display: flex; gap: 4px; }
+  .pips i { flex: 1; height: 6px; border-radius: 3px; background: var(--off); }
+  .pips i.on { background: var(--accent); }
+  .eff { font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+  .buy { margin-top: auto; }
+  .res { display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+  .stats { list-style: none; margin: 0; padding: 0; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 8px; }
+  .stats li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 12px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  .stats span { color: var(--muted); }
+  .pad { display: flex; justify-content: space-between; gap: 12px; direction: ltr; }
+  .pad[hidden] { display: none !important; }
+  .pad .g { display: flex; gap: 10px; }
+  .pad button {
+    font-family: var(--display); width: 68px; height: 62px; font-size: 1.4rem; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--fg); touch-action: none; user-select: none; -webkit-user-select: none;
+  }
+  .pad button.act { width: 86px; font-size: 0.95rem; font-weight: 600; background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+  .pad button.on { filter: brightness(0.85); transform: scale(0.95); }
+  .hint { margin: 0; font-size: 0.85rem; color: var(--muted); }
+  .hint[hidden] { display: none !important; }
+  #rot { display: none; position: fixed; inset: 0; z-index: 20; background: var(--bg); color: var(--fg); flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 24px; }
+  #rot .ph { width: 44px; height: 76px; border: 4px solid var(--fg); border-radius: 10px; animation: turn 2.4s ease-in-out infinite; }
+  #rot p { margin: 0; font-weight: 600; font-size: 1.1rem; }
+  @keyframes turn { 0%, 25% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+  @media (hover: none), (pointer: coarse) {
+    body.playing { padding: 0; overflow: hidden; }
+    body.playing .app { max-width: none; gap: 0; }
+    body.playing header, body.playing .hint { display: none; }
+    body.playing .stage { position: fixed; inset: 0; z-index: 1; border: 0; border-radius: 0; background: #000; display: flex; align-items: center; justify-content: center; }
+    body.playing .pad {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; pointer-events: none;
+      padding-block: 10px max(12px, env(safe-area-inset-bottom, 0px));
+      padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px));
+    }
+    body.playing .pad button { pointer-events: auto; opacity: 0.55; width: 64px; height: 58px; backdrop-filter: blur(2px); }
+    body.playing .pad button.act { width: 92px; }
+    body.playing .pad button.on { opacity: 0.85; }
+    body.playing .pad .g { gap: 12px; }
+  }
+  @media (orientation: portrait) and ((hover: none), (pointer: coarse)) { body.playing #rot { display: flex; } }
+  @media (hover: hover) and (pointer: fine) { .pad { display: none !important; } }
+  @media (hover: none), (pointer: coarse) { .hint { display: none !important; } }
+  @media (prefers-reduced-motion: reduce) { .pad button.on { transform: none; } }
 </style>
-</head>
-<body>
-<div class="app">
-  <header class="top">
-    <div class="brand">✂ <b>CutLab</b> Studio <span class="badge">PRO</span></div>
-    <span class="spacer"></span>
-    <button id="importBtn">＋ افزودن فایل</button>
-    <input id="fileInput" type="file" accept="video/*,audio/*,image/*,.srt,.vtt,.txt,.mkv,.mov" multiple hidden>
-    <button id="subtitleBtn">زیرنویس (SRT/VTT)</button>
-    <input id="subtitleInput" type="file" accept=".srt,.vtt,.txt" hidden>
-    <button id="saveProject">ذخیره پروژه</button>
-    <button id="loadProjectBtn">بازکردن پروژه</button>
-    <input id="loadProjectInput" type="file" accept=".json" hidden>
-    <button class="primary" id="exportBtn">خروجی ویدیو</button>
+
+<div class="app" dir="rtl" lang="fa">
+  <header>
+    <h1>ربات پرنده</h1>
+    <div class="gemchip"><i></i><span id="gemN">۰</span></div>
   </header>
-
-  <div class="layout">
-    <aside class="panel left">
-      <div class="panelhead">کتابخانه رسانه <button class="small danger" id="clearMedia">پروژه جدید</button></div>
-      <div class="scrollbody">
-        <div id="mediaList" class="media-list"></div>
-        <div class="help">
-          فایل‌ها را می‌توانی بکشی و رها کنی. با <b>+</b> کلیپ به تایم‌لاین اضافه می‌شود و با <b>♫</b> فقط صدای ویدیو.<br>
-          پروژه به‌صورت خودکار در همین مرورگر ذخیره می‌شود.
-        </div>
-      </div>
-    </aside>
-
-    <main class="center">
-      <section class="panel preview">
-        <div class="panelhead">
-          <span>مانیتور پیش‌نمایش</span>
-          <select id="sizeSel" class="sizesel" title="اندازه ویدیو">
-            <option value="1280x720">16:9 · 1280×720</option>
-            <option value="1920x1080">16:9 · 1920×1080</option>
-            <option value="720x1280">9:16 · 720×1280</option>
-            <option value="1080x1920">9:16 · 1080×1920</option>
-            <option value="1080x1080">1:1 · 1080×1080</option>
-          </select>
-        </div>
-        <div class="stage" id="stage"><canvas id="cv" width="1280" height="720"></canvas></div>
-        <div class="transport">
-          <button id="toStart" title="رفتن به ابتدا (Home)">⏮</button>
-          <button id="backBtn" title="۵ ثانیه عقب">−۵</button>
-          <button id="playBtn" class="primary" title="پخش / مکث (Space)">▶ پخش</button>
-          <button id="forwardBtn" title="۵ ثانیه جلو">+۵</button>
-          <button id="toEnd" title="رفتن به انتها (End)">⏭</button>
-          <span class="timecode" id="timecode">00:00.0 / 00:00.0</span>
-        </div>
-      </section>
-
-      <section class="panel timeline">
-        <div class="tltools">
-          <button id="addText">＋ متن</button>
-          <button id="addSub">＋ زیرنویس</button>
-          <span class="sep"></span>
-          <button id="splitBtn" title="برش در نشانگر (S)">✂ برش</button>
-          <button id="dupBtn" title="کپی (Ctrl+D)">کپی</button>
-          <button id="delBtn" class="danger" title="حذف (Delete)">حذف</button>
-          <span class="sep"></span>
-          <button id="undoBtn" title="بازگشت (Ctrl+Z)">↶</button>
-          <button id="redoBtn" title="جلو (Ctrl+Y)">↷</button>
-          <span class="sep"></span>
-          <button id="zoomOut" title="کوچک‌نمایی">−</button>
-          <button id="zoomIn" title="بزرگ‌نمایی">+</button>
-          <button id="fitTimeline">جا شدن</button>
-          <button id="srtOut" title="گرفتن زیرنویس‌ها به‌صورت فایل SRT">SRT ⬇</button>
-        </div>
-        <div class="tl" id="tl">
-          <div class="tl-inner" id="tlInner">
-            <div class="ruler-row"><div class="corner"></div><div class="ruler" id="ruler"></div></div>
-            <div id="tracks"></div>
-            <div class="playline" id="playline"></div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <aside class="panel right">
-      <div class="panelhead">تنظیمات و افکت‌ها <span class="muted" id="selectedType">بدون انتخاب</span></div>
-      <div class="scrollbody" id="props"></div>
-    </aside>
+  <section id="screen" class="screen"></section>
+  <div id="stage" class="stage" hidden><canvas id="cv" aria-label="صفحه بازی"></canvas></div>
+  <div id="pad" class="pad" hidden>
+    <div class="g"><button type="button" id="bL" aria-label="چپ">◀</button><button type="button" id="bR" aria-label="راست">▶</button></div>
+    <div class="g"><button type="button" id="bF" class="act">شلیک</button><button type="button" id="bJ" class="act">پرش / پرواز</button></div>
   </div>
+  <p id="hint" class="hint" hidden>حرکت: ← → · پرش و پرواز (نگه دار): فاصله · شلیک: J · مکث: Esc</p>
 </div>
 
-<div class="modal" id="exportModal" hidden>
-  <div class="box">
-    <h3>خروجی ویدیو</h3>
-    <div id="exportOpts">
-      <div class="field"><label>قالب فایل</label><select id="exportFormat"></select></div>
-      <div class="field"><label>کیفیت (حجم فایل)</label>
-        <select id="exportBitrate">
-          <option value="4000000">معمولی — حدود ۳۰ مگابایت در دقیقه</option>
-          <option value="8000000" selected>خوب — حدود ۶۰ مگابایت در دقیقه</option>
-          <option value="16000000">عالی — حدود ۱۲۰ مگابایت در دقیقه</option>
-        </select>
-      </div>
-      <div class="help">خروجی هم‌زمان با پخش ضبط می‌شود؛ پس ساختنش به‌اندازه‌ی طول ویدیو طول می‌کشد. تا پایان کار این تب را باز و روی صفحه نگه دار.</div>
-      <div class="row2"><button class="primary" id="exportStart">شروع ساخت</button><button id="exportClose">بستن</button></div>
-    </div>
-    <div id="exportProg" hidden>
-      <div class="bar"><i id="exportBar"></i></div>
-      <div id="exportMsg" class="help"></div>
-      <div class="row2"><button id="exportCancel" class="danger">لغو</button></div>
-    </div>
-  </div>
-</div>
-<div id="toast" class="toast"></div>
+<div id="rot" dir="rtl" lang="fa"><div class="ph"></div><p>گوشی رو بچرخون تا افقی بشه</p></div>
 
-<script>
-(() => {
-'use strict';
-
-/* ============================================================
-   ثابت‌ها و وضعیت برنامه
-   ============================================================ */
-const LABEL = 86;   // عرض ستون نام ترک‌ها در تایم‌لاین (پیکسل)
-const TRACKS = [
-  { key: 'video2',   kind: 'video', label: 'ویدیو ۲' },
-  { key: 'video',    kind: 'video', label: 'ویدیو ۱' },
-  { key: 'audio',    kind: 'audio', label: 'صدا ۱' },
-  { key: 'audio2',   kind: 'audio', label: 'صدا ۲' },
-  { key: 'subtitle', kind: 'sub',   label: 'زیرنویس' }
-];
-const kindOf = key => TRACKS.find(t => t.key === key).kind;
-
-const FX_DEFAULTS = {
-  speed: 1, volume: 100, brightness: 100, contrast: 100, saturation: 100,
-  opacity: 100, rotation: 0, filter: 'none', scale: 100, posX: 0, posY: 0,
-  fadeIn: 0, fadeOut: 0
-};
-const FILTERS = [
-  ['none', 'بدون فیلتر'], ['grayscale(1)', 'سیاه‌وسفید'], ['sepia(.85)', 'سپیا'],
-  ['hue-rotate(45deg)', 'رنگ گرم'], ['hue-rotate(190deg)', 'رنگ سرد'], ['invert(1)', 'معکوس'],
-  ['blur(2px)', 'محو'], ['contrast(1.35) saturate(1.3)', 'سینمایی']
-];
-const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4];
-
-const S = {
-  assets: [],      // {id,name,size,type,duration,file,url,img,missing}
-  clips: [],
-  sel: null,       // شناسه کلیپ انتخاب‌شده
-  time: 0,
-  playing: false,
-  zoom: 42,        // پیکسل در هر ثانیه
-  W: 1280, H: 720,
-  mute: {}, hidden: {},
-  idN: 1
-};
-
-const $ = id => document.getElementById(id);
-const uid = () => S.idN++;
-const asset = id => S.assets.find(a => a.id === id);
-const clipById = id => S.clips.find(c => c.id === id);
-const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const num = (v, d = 0) => { v = Number(v); return Number.isFinite(v) ? v : d; };
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-function el(tag, cls, text) {
-  const e = document.createElement(tag);
-  if (cls) e.className = cls;
-  if (text != null) e.textContent = text;
-  return e;
-}
-function say(msg) {
-  const t = $('toast');
-  t.textContent = msg; t.style.display = 'block';
-  clearTimeout(say.t); say.t = setTimeout(() => { t.style.display = 'none'; }, 3200);
-}
-function fmt(s) {
-  s = Math.max(0, num(s));
-  const p = n => String(n).padStart(2, '0');
-  return `${p(Math.floor(s / 60))}:${p(Math.floor(s % 60))}.${Math.floor((s % 1) * 10)}`;
-}
-function contentEnd() { return S.clips.reduce((m, c) => Math.max(m, c.start + c.duration), 0); }
-function tlLen() { return Math.max(30, contentEnd() + 10); }
-function trackEnd(track) { return S.clips.filter(c => c.track === track).reduce((m, c) => Math.max(m, c.start + c.duration), 0); }
-function isMediaClip(c) { const a = asset(c.assetId); return !!a && (a.type === 'video' || a.type === 'audio'); }
-function isVisualClip(c) { return c.track !== 'subtitle' && !c.isText && kindOf(c.track) === 'video'; }
-
-/* مدت قابل‌استفاده‌ی کلیپ بر اساس طول فایل اصلی، سرعت و نقطه‌ی شروع */
-function maxDur(c) {
-  const a = asset(c.assetId);
-  if (a && (a.type === 'video' || a.type === 'audio') && a.duration) return Math.max(0.1, (a.duration - c.trimIn) / c.speed);
-  return 36000;
-}
-function newClip(o) {
-  return Object.assign({
-    id: uid(), assetId: null, track: 'video', start: 0, duration: 5, trimIn: 0,
-    text: '', textColor: '#ffffff', fontSize: 40, textPos: 'bottom', isText: false
-  }, FX_DEFAULTS, o);
-}
-/* محو شدن ابتدا و انتهای کلیپ: ضریب بین ۰ و ۱ */
-function fadeFactor(c, t) {
-  let f = 1;
-  if (c.fadeIn > 0) f = Math.min(f, (t - c.start) / c.fadeIn);
-  if (c.fadeOut > 0) f = Math.min(f, (c.start + c.duration - t) / c.fadeOut);
-  return clamp(f, 0, 1);
-}
-
-/* ============================================================
-   تاریخچه (Undo / Redo) و ذخیره‌ی خودکار
-   ============================================================ */
-let hist = [], hi = -1;
-function snapshot() { return JSON.stringify({ clips: S.clips, W: S.W, H: S.H, mute: S.mute, hidden: S.hidden }); }
-function commit() {
-  const snap = snapshot();
-  if (snap === hist[hi]) return;
-  hist.length = hi + 1;
-  hist.push(snap);
-  if (hist.length > 150) hist.shift();
-  hi = hist.length - 1;
-  updateButtons();
-  scheduleAutosave();
-}
-function resetHistory() { hist = [snapshot()]; hi = 0; updateButtons(); }
-function applySnap(s) {
-  const d = JSON.parse(s);
-  S.clips = d.clips; S.W = d.W; S.H = d.H; S.mute = d.mute || {}; S.hidden = d.hidden || {};
-  if (!clipById(S.sel)) S.sel = null;
-  applyCanvasSize(); renderAll(); scheduleAutosave();
-}
-function undo() { if (hi > 0) { hi--; applySnap(hist[hi]); updateButtons(); } }
-function redo() { if (hi < hist.length - 1) { hi++; applySnap(hist[hi]); updateButtons(); } }
-function updateButtons() { $('undoBtn').disabled = hi <= 0; $('redoBtn').disabled = hi >= hist.length - 1; }
-
-/* ---------- IndexedDB: نگه‌داشتن پروژه و فایل‌ها بعد از بستن مرورگر ---------- */
-const DB = {
-  open() {
-    return new Promise((res, rej) => {
-      const r = indexedDB.open('cutlab-studio', 1);
-      r.onupgradeneeded = () => { r.result.createObjectStore('kv'); r.result.createObjectStore('media'); };
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    });
-  },
-  async run(store, mode, fn) {
-    const db = await this.open();
-    return new Promise((res, rej) => {
-      const t = db.transaction(store, mode);
-      let req;
-      try { req = fn(t.objectStore(store)); } catch (e) { db.close(); rej(e); return; }
-      t.oncomplete = () => { db.close(); res(req && 'result' in req ? req.result : undefined); };
-      t.onerror = t.onabort = () => { db.close(); rej(t.error); };
-    });
-  },
-  put(store, key, val) { return this.run(store, 'readwrite', s => s.put(val, key)); },
-  get(store, key) { return this.run(store, 'readonly', s => s.get(key)); },
-  del(store, key) { return this.run(store, 'readwrite', s => s.delete(key)); },
-  clear(store) { return this.run(store, 'readwrite', s => s.clear()); }
-};
-let autosaveTimer = null, dbWarned = false;
-function dbWarn() { if (!dbWarned) { dbWarned = true; say('ذخیره‌ی خودکار در مرورگر ممکن نشد؛ پروژه را دستی ذخیره کن'); } }
-function scheduleAutosave() {
-  clearTimeout(autosaveTimer);
-  autosaveTimer = setTimeout(() => { DB.put('kv', 'project', projectData()).catch(dbWarn); }, 800);
-}
-
-/* ============================================================
-   کتابخانه رسانه
-   ============================================================ */
-const VIDEO_EXT = /\.(mp4|m4v|mov|webm|mkv|avi|ogv|3gp)$/i;
-const AUDIO_EXT = /\.(mp3|wav|ogg|oga|m4a|aac|flac|opus)$/i;
-const IMAGE_EXT = /\.(png|jpe?g|gif|webp|bmp|avif)$/i;
-
-function detectType(file) {
-  if (file.type.startsWith('video/')) return 'video';
-  if (file.type.startsWith('audio/')) return 'audio';
-  if (file.type.startsWith('image/')) return 'image';
-  if (VIDEO_EXT.test(file.name)) return 'video';
-  if (AUDIO_EXT.test(file.name)) return 'audio';
-  if (IMAGE_EXT.test(file.name)) return 'image';
-  return null;
-}
-
-async function importFile(file) {
-  if (/\.(srt|vtt|txt)$/i.test(file.name)) { importSubtitleFile(file); return; }
-  const type = detectType(file);
-  if (!type) { say('فرمت این فایل پشتیبانی نمی‌شود: ' + file.name); return; }
-
-  // اگر پروژه‌ی بازشده فایلی با همین نام «گم‌شده» دارد، همان را وصل می‌کنیم
-  const missing = S.assets.filter(a => a.missing && a.name === file.name);
-  const target = missing.find(a => a.size === file.size) || missing[0];
-  if (target) {
-    attachFile(target, file, type);
-    DB.put('media', target.id, file).catch(dbWarn);
-    say('فایل «' + file.name + '» به پروژه وصل شد');
-    renderAll();
-    return;
-  }
-  const a = { id: uid(), name: file.name, size: file.size, type, duration: type === 'image' ? 5 : 0 };
-  S.assets.push(a);
-  attachFile(a, file, type);
-  DB.put('media', a.id, file).catch(dbWarn);
-  renderLibrary();
-}
-
-function attachFile(a, file, type) {
-  a.file = file; a.type = type || a.type; a.missing = false;
-  a.url = URL.createObjectURL(file);
-  if (a.type === 'image') {
-    a.img = new Image();
-    a.img.onload = () => { a.w = a.img.naturalWidth; a.h = a.img.naturalHeight; renderNow(); };
-    a.img.onerror = () => say('تصویر بارگذاری نشد: ' + a.name);
-    a.img.src = a.url;
-    renderLibrary();
-    return;
-  }
-  const probe = document.createElement(a.type === 'audio' ? 'audio' : 'video');
-  probe.preload = 'metadata';
-  probe.onloadedmetadata = () => {
-    const done = () => {
-      a.duration = Number.isFinite(probe.duration) ? probe.duration : 0;
-      a.w = probe.videoWidth; a.h = probe.videoHeight;
-      probe.removeAttribute('src'); probe.load();
-      renderLibrary(); renderProps();
-    };
-    if (probe.duration === Infinity) {      // بعضی فایل‌های webm طول ندارند؛ با این ترفند خوانده می‌شود
-      probe.ontimeupdate = () => { probe.ontimeupdate = null; done(); };
-      probe.currentTime = 1e101;
-    } else done();
-  };
-  probe.onerror = () => { say('فایل بارگذاری نشد؛ فرمت آن را بررسی کن: ' + a.name); a.broken = true; renderLibrary(); };
-  probe.src = a.url;
-  renderLibrary();
-}
-
-function renderLibrary() {
-  const box = $('mediaList');
-  box.innerHTML = '';
-  if (!S.assets.length) { box.append(el('div', 'help', 'هنوز فایلی اضافه نشده است.')); return; }
-  S.assets.forEach(a => {
-    const row = el('div', 'media' + (a.missing ? ' missing' : ''));
-    const th = el('div', 'mthumb');
-    if (a.type === 'image' && a.url) { const im = new Image(); im.src = a.url; th.append(im); }
-    else th.textContent = a.type === 'video' ? '▶' : a.type === 'audio' ? '♫' : '▧';
-    const meta = el('div', 'mname');
-    const nm = el('b', null, a.name); nm.title = a.name;
-    const info = a.missing ? 'فایل پیدا نشد؛ دوباره اضافه کن'
-      : a.broken ? 'خراب یا ناشناخته'
-      : (a.type !== 'image' && !a.duration ? 'در حال خواندن…' : (a.type === 'image' ? 'تصویر' : fmt(a.duration)));
-    meta.append(nm, el('small', null, info));
-    row.append(th, meta);
-    const add = el('button', 'small', '+'); add.title = 'افزودن به تایم‌لاین';
-    add.onclick = () => addAssetClip(a, false);
-    row.append(add);
-    if (a.type === 'video') {
-      const au = el('button', 'small', '♫'); au.title = 'افزودن فقط صدا';
-      au.onclick = () => addAssetClip(a, true);
-      row.append(au);
-    }
-    const rm = el('button', 'small danger', '×'); rm.title = 'حذف از کتابخانه';
-    rm.onclick = () => removeAsset(a);
-    row.append(rm);
-    box.append(row);
-  });
-}
-
-function removeAsset(a) {
-  const used = S.clips.filter(c => c.assetId === a.id).length;
-  if (used && !confirm(`این فایل در ${used} کلیپ استفاده شده؛ کلیپ‌ها هم حذف شوند؟`)) return;
-  pause();
-  S.clips = S.clips.filter(c => c.assetId !== a.id);
-  S.assets = S.assets.filter(x => x !== a);
-  if (a.url) URL.revokeObjectURL(a.url);
-  DB.del('media', a.id).catch(() => {});
-  if (!clipById(S.sel)) S.sel = null;
-  resetHistory(); scheduleAutosave(); renderAll();
-}
-
-function addAssetClip(a, audioOnly) {
-  if (a.missing) { say('این فایل پیدا نشده؛ ابتدا همان فایل را دوباره اضافه کن'); return; }
-  if (a.broken) { say('این فایل قابل خواندن نیست'); return; }
-  if (a.type !== 'image' && !a.duration) { say('فایل هنوز در حال خواندن است؛ چند لحظه بعد دوباره امتحان کن'); return; }
-  const track = (a.type === 'audio' || audioOnly) ? 'audio' : 'video';
-  const c = newClip({
-    assetId: a.id, track, start: trackEnd(track),
-    duration: a.type === 'image' ? 5 : a.duration
-  });
-  S.clips.push(c); S.sel = c.id;
-  commit(); renderAll(); setTime(c.start);
-  say('کلیپ اضافه شد');
-}
-
-/* ============================================================
-   موتور پخش و ترکیب (هم برای پیش‌نمایش و هم برای خروجی)
-   ============================================================ */
-function filterString(c) {
-  const p = [];
-  if (c.brightness !== 100) p.push(`brightness(${c.brightness / 100})`);
-  if (c.contrast !== 100) p.push(`contrast(${c.contrast / 100})`);
-  if (c.saturation !== 100) p.push(`saturate(${c.saturation / 100})`);
-  if (c.filter && c.filter !== 'none') p.push(c.filter);
-  return p.join(' ');
-}
-
-function wrapLines(ctx, text, maxW) {
-  const out = [];
-  for (const para of String(text).split('\n')) {
-    let line = '';
-    for (const w of para.split(/\s+/).filter(Boolean)) {
-      const test = line ? line + ' ' + w : w;
-      if (line && ctx.measureText(test).width > maxW) { out.push(line); line = w; } else line = test;
-    }
-    out.push(line);
-  }
-  return out;
-}
-function drawText(ctx, text, color, size, pos, alpha) {
-  const W = ctx.canvas.width, H = ctx.canvas.height;
-  const fs = Math.max(8, size) * Math.min(W, H) / 720;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.font = `bold ${fs}px Tahoma, "Segoe UI", Arial, sans-serif`;
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.direction = /[֐-ࣿﭐ-﻿]/.test(text) ? 'rtl' : 'ltr';
-  const lines = wrapLines(ctx, text, W * 0.9), lh = fs * 1.35, total = lines.length * lh;
-  const y0 = pos === 'top' ? H * 0.07 + lh / 2 : pos === 'center' ? H / 2 - total / 2 + lh / 2 : H * 0.93 - total + lh / 2;
-  ctx.lineJoin = 'round'; ctx.lineWidth = fs * 0.14; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.fillStyle = color || '#fff';
-  lines.forEach((l, i) => { ctx.strokeText(l, W / 2, y0 + i * lh); ctx.fillText(l, W / 2, y0 + i * lh); });
-  ctx.restore();
-}
-
-class Engine {
-  constructor(canvas, forExport) {
-    this.canvas = canvas; this.ctx = canvas.getContext('2d');
-    this.forExport = !!forExport;
-    this.media = new Map();            // شناسه کلیپ → {el, url, src, gain}
-    this.ac = null; this.out = null; this.dest = null;
-    this.onFrame = () => {};
-  }
-  initAudio() {
-    if (this.ac) return;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    try {
-      this.ac = new AC();
-      if (this.forExport) { this.dest = this.ac.createMediaStreamDestination(); this.out = this.dest; }
-      else this.out = this.ac.destination;
-    } catch (e) { this.ac = null; }
-  }
-  resume() { if (this.ac && this.ac.state === 'suspended') this.ac.resume().catch(() => {}); }
-
-  rec(c, a) {
-    let r = this.media.get(c.id);
-    if (r && r.url !== a.url) { this.drop(c.id); r = null; }
-    if (!r) {
-      const e = document.createElement(a.type === 'audio' ? 'audio' : 'video');
-      e.preload = 'auto'; e.playsInline = true; e.src = a.url;
-      e.addEventListener('seeked', () => this.onFrame());
-      e.addEventListener('loadeddata', () => this.onFrame());
-      r = { el: e, url: a.url, src: null, gain: null };
-      this.media.set(c.id, r);
-    }
-    if (this.ac && !r.gain) {
-      try {
-        r.src = this.ac.createMediaElementSource(r.el);
-        r.gain = this.ac.createGain();
-        r.src.connect(r.gain); r.gain.connect(this.out);
-      } catch (e) { /* بدون مسیر WebAudio ادامه می‌دهیم */ }
-    }
-    return r;
-  }
-  drop(id) {
-    const r = this.media.get(id);
-    if (!r) return;
-    try { r.el.pause(); } catch (e) {}
-    try { if (r.src) r.src.disconnect(); if (r.gain) r.gain.disconnect(); } catch (e) {}
-    r.el.removeAttribute('src'); try { r.el.load(); } catch (e) {}
-    this.media.delete(id);
-  }
-  dropAll() { [...this.media.keys()].forEach(id => this.drop(id)); }
-  setGain(r, v) {
-    if (r.gain) r.gain.gain.setTargetAtTime(v, this.ac.currentTime, 0.015);
-    else r.el.volume = clamp(v, 0, 1);
-  }
-  seekEl(e, t) { try { e.currentTime = t; } catch (err) {} }
-
-  /* همگام‌کردن همه‌ی عنصرهای صدا/ویدیو با زمان t */
-  update(t, playing) {
-    for (const c of S.clips) {
-      if (c.track === 'subtitle' || c.isText) continue;
-      const a = asset(c.assetId);
-      if (!a || a.missing || !a.url || a.type === 'image') continue;
-      const active = t >= c.start && t < c.start + c.duration;
-      const soon = !active && t < c.start && c.start - t < 2.5;
-      if (!active && !soon) { this.drop(c.id); continue; }
-      const r = this.rec(c, a), e = r.el;
-      if (active) {
-        const limit = a.duration ? a.duration - 0.03 : 1e9;
-        const wanted = clamp(c.trimIn + (t - c.start) * c.speed, 0, limit);
-        e.playbackRate = clamp(c.speed, 0.0625, 16);
-        if (playing) {
-          if (e.paused) {
-            if (Math.abs(e.currentTime - wanted) > 0.05) this.seekEl(e, wanted);
-            if (wanted < limit) e.play().catch(() => {});
-          } else if (Math.abs(e.currentTime - wanted) > 0.35) this.seekEl(e, wanted);
-        } else {
-          if (!e.paused) e.pause();
-          if (Math.abs(e.currentTime - wanted) > 0.03) this.seekEl(e, wanted);
-        }
-        this.setGain(r, S.mute[c.track] ? 0 : (c.volume / 100) * fadeFactor(c, t));
-      } else {
-        if (!e.paused) e.pause();
-        this.setGain(r, 0);
-        if (Math.abs(e.currentTime - c.trimIn) > 0.05) this.seekEl(e, c.trimIn);
-      }
-    }
-    for (const id of [...this.media.keys()]) if (!S.clips.some(c => c.id === id)) this.drop(id);
-  }
-
-  draw(t) {
-    const ctx = this.ctx, W = this.canvas.width, H = this.canvas.height;
-    ctx.globalAlpha = 1; ctx.filter = 'none';
-    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-    for (const tk of ['video', 'video2']) {
-      if (S.hidden[tk]) continue;
-      S.clips
-        .filter(c => c.track === tk && t >= c.start && t < c.start + c.duration)
-        .sort((x, y) => (x.isText - y.isText) || (x.start - y.start))
-        .forEach(c => this.drawClip(c, t));
-    }
-    S.clips
-      .filter(c => c.track === 'subtitle' && c.text && t >= c.start && t < c.start + c.duration)
-      .forEach(c => drawText(ctx, c.text, c.textColor, c.fontSize, 'bottom', fadeFactor(c, t)));
-  }
-  drawClip(c, t) {
-    const ctx = this.ctx, W = this.canvas.width, H = this.canvas.height;
-    const f = fadeFactor(c, t);
-    if (!c.isText) {
-      const a = asset(c.assetId);
-      let src = null, w = 0, h = 0;
-      if (a && !a.missing) {
-        if (a.type === 'image' && a.img && a.img.complete && a.img.naturalWidth) { src = a.img; w = a.img.naturalWidth; h = a.img.naturalHeight; }
-        else if (a.type === 'video') {
-          const r = this.media.get(c.id);
-          if (r && r.el.readyState >= 2 && r.el.videoWidth) { src = r.el; w = r.el.videoWidth; h = r.el.videoHeight; }
-        }
-      }
-      if (src) {
-        const rot = ((c.rotation % 360) + 360) % 360, swap = rot === 90 || rot === 270;
-        const fit = Math.min(W / (swap ? h : w), H / (swap ? w : h)) * c.scale / 100;
-        ctx.save();
-        ctx.globalAlpha = clamp(c.opacity / 100, 0, 1) * f;
-        const flt = filterString(c); if (flt) ctx.filter = flt;
-        ctx.translate(W / 2 + c.posX / 100 * W, H / 2 + c.posY / 100 * H);
-        ctx.rotate(rot * Math.PI / 180); ctx.scale(fit, fit);
-        ctx.drawImage(src, -w / 2, -h / 2, w, h);
-        ctx.restore();
-      }
-    }
-    if (c.text) drawText(ctx, c.text, c.textColor, c.fontSize, c.textPos || 'bottom', f);
-  }
-  render(t, playing) { this.update(t, playing); this.draw(t); }
-}
-
-const pv = new Engine($('cv'), false);
-pv.onFrame = () => { if (!S.playing) renderNow(); };
-
-function applyCanvasSize() {
-  const cv = $('cv');
-  if (cv.width !== S.W || cv.height !== S.H) { cv.width = S.W; cv.height = S.H; }
-  $('sizeSel').value = S.W + 'x' + S.H;
-}
-function renderNow() { pv.render(S.time, S.playing); updateTimeUI(); }
-
-/* ---------- پخش ---------- */
-let raf = 0, lastT = 0;
-function play() {
-  if (S.playing) return;
-  const end = contentEnd();
-  if (!end) { say('اول چیزی به تایم‌لاین اضافه کن'); return; }
-  if (S.time >= end - 0.05) S.time = 0;
-  pv.initAudio(); pv.resume();
-  S.playing = true; lastT = performance.now();
-  $('playBtn').textContent = '⏸ مکث';
-  raf = requestAnimationFrame(loop);
-}
-function loop(now) {
-  if (!S.playing) return;
-  S.time += (now - lastT) / 1000; lastT = now;
-  const end = contentEnd();
-  if (S.time >= end) { S.time = end; pause(); return; }
-  pv.render(S.time, true);
-  updateTimeUI(); followPlayhead();
-  raf = requestAnimationFrame(loop);
-}
-function pause() {
-  S.playing = false; cancelAnimationFrame(raf);
-  $('playBtn').textContent = '▶ پخش';
-  renderNow();
-}
-function togglePlay() { S.playing ? pause() : play(); }
-function setTime(t) { S.time = clamp(t, 0, tlLen()); renderNow(); }
-function followPlayhead() {
-  const tl = $('tl'), x = LABEL + S.time * S.zoom;
-  if (x > tl.scrollLeft + tl.clientWidth - 30 || x < tl.scrollLeft + LABEL) tl.scrollLeft = Math.max(0, x - LABEL - 60);
-}
-function updateTimeUI() {
-  $('timecode').textContent = fmt(S.time) + ' / ' + fmt(contentEnd());
-  $('playline').style.left = (LABEL + S.time * S.zoom) + 'px';
-}
-
-/* ============================================================
-   تایم‌لاین
-   ============================================================ */
-const rowAreas = {};
-function xToTime(clientX) { return (clientX - $('tlInner').getBoundingClientRect().left - LABEL) / S.zoom; }
-
-function renderTimeline() {
-  const len = tlLen(), z = S.zoom;
-  $('tlInner').style.width = (LABEL + len * z) + 'px';
-  const ruler = $('ruler'); ruler.style.width = (len * z) + 'px'; ruler.innerHTML = '';
-  const step = [0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600].find(s => s * z >= 70) || 600;
-  for (let s = 0; s <= len; s += step) {
-    const tk = el('span', null, step < 1 ? fmt(s) : fmt(s).slice(0, 5));
-    tk.style.left = (s * z) + 'px'; ruler.append(tk);
-  }
-  const tracks = $('tracks'); tracks.innerHTML = '';
-  for (const tr of TRACKS) {
-    const row = el('div', 'track');
-    const lab = el('div', 'tlabel'); lab.append(el('span', null, tr.label));
-    const btns = el('span', 'tbtns');
-    if (tr.kind !== 'sub') {
-      const m = el('button', S.mute[tr.key] ? 'off' : '', '🔊'); m.title = 'قطع/وصل صدا';
-      m.onclick = () => { S.mute[tr.key] = !S.mute[tr.key]; commit(); renderTimeline(); renderNow(); };
-      btns.append(m);
-    }
-    if (tr.kind === 'video') {
-      const h = el('button', S.hidden[tr.key] ? 'off' : '', '👁'); h.title = 'نمایش/پنهان‌کردن تصویر';
-      h.onclick = () => { S.hidden[tr.key] = !S.hidden[tr.key]; commit(); renderTimeline(); renderNow(); };
-      btns.append(h);
-    }
-    lab.append(btns);
-    const area = el('div', 'tarea'); area.style.width = (len * z) + 'px';
-    area.addEventListener('pointerdown', e => { if (e.target === area) scrubStart(e); });
-    rowAreas[tr.key] = area;
-    S.clips.filter(c => c.track === tr.key).forEach(c => area.append(buildClipEl(c)));
-    row.append(lab, area); tracks.append(row);
-  }
-  updateTimeUI();
-}
-
-function buildClipEl(c) {
-  const a = asset(c.assetId), z = S.zoom;
-  const missing = !c.isText && c.track !== 'subtitle' && (!a || a.missing);
-  const cls = ['clip', kindOf(c.track)];
-  if (a && a.type === 'image') cls.push('image');
-  if (c.isText) cls.push('text');
-  if (missing) cls.push('missing');
-  if (S.sel === c.id) cls.push('selected');
-  const b = el('div', cls.join(' '));
-  b.style.left = (c.start * z) + 'px'; b.style.width = Math.max(8, c.duration * z) + 'px';
-  b.dataset.id = c.id;
-  let label = c.isText ? 'T ' + c.text : c.track === 'subtitle' ? 'CC ' + c.text : (a ? a.name : 'فایل نامشخص');
-  if (c.speed !== 1) label += ' ×' + c.speed;
-  b.title = `${label}\nشروع ${fmt(c.start)} · مدت ${fmt(c.duration)}`;
-  const hl = el('span', 'handle l'), hr = el('span', 'handle r');
-  b.append(hl, el('span', 'cl', label), hr);
-  b.addEventListener('pointerdown', e => clipPointerDown(e, c, b, 'move'));
-  hl.addEventListener('pointerdown', e => clipPointerDown(e, c, b, 'l'));
-  hr.addEventListener('pointerdown', e => clipPointerDown(e, c, b, 'r'));
-  return b;
-}
-
-function snapPoints(c) {
-  const pts = [0, S.time];
-  S.clips.forEach(o => { if (o !== c) pts.push(o.start, o.start + o.duration); });
-  return pts;
-}
-function bestSnap(pts, edges, th) {
-  let best = null;
-  for (const e of edges) for (const p of pts) {
-    const d = p - e;
-    if (Math.abs(d) < th && (best === null || Math.abs(d) < Math.abs(best))) best = d;
-  }
-  return best === null ? 0 : best;
-}
-function rowAt(clientY) {
-  for (const tr of TRACKS) {
-    const r = rowAreas[tr.key].getBoundingClientRect();
-    if (clientY >= r.top && clientY < r.bottom) return tr.key;
-  }
-  return null;
-}
-
-function clipPointerDown(e, c, b, mode) {
-  if (e.button !== 0) return;
-  e.preventDefault(); e.stopPropagation();
-  if (S.sel !== c.id) {
-    S.sel = c.id;
-    document.querySelectorAll('.clip.selected').forEach(x => x.classList.remove('selected'));
-    b.classList.add('selected');
-    renderProps();
-  }
-  const x0 = e.clientX, y0 = e.clientY;
-  const orig = { start: c.start, duration: c.duration, trimIn: c.trimIn };
-  const kind = kindOf(c.track), pts = snapPoints(c), th = 8 / S.zoom;
-  const media = isMediaClip(c);
-  let moved = false;
-
-  const move = ev => {
-    if (!moved && Math.abs(ev.clientX - x0) < 3 && Math.abs(ev.clientY - y0) < 3) return;
-    moved = true;
-    const dx = (ev.clientX - x0) / S.zoom;
-    if (mode === 'move') {
-      let s = Math.max(0, orig.start + dx);
-      s = Math.max(0, s + bestSnap(pts, [s, s + c.duration], th));
-      c.start = s;
-      const tk = rowAt(ev.clientY);
-      if (tk && tk !== c.track && kindOf(tk) === kind && allowedKinds(c).includes(kind)) {
-        c.track = tk; rowAreas[tk].append(b);
-      }
-    } else if (mode === 'r') {
-      let d = clamp(orig.duration + dx, 0.1, maxDur(c));
-      d += bestSnap(pts, [c.start + d], th);
-      c.duration = clamp(d, 0.1, maxDur(c));
-    } else {
-      let dt = dx + bestSnap(pts, [orig.start + dx], th);
-      dt = Math.max(dt, -orig.start);
-      dt = Math.min(dt, orig.duration - 0.1);
-      if (media) dt = Math.max(dt, -orig.trimIn / c.speed);
-      c.start = orig.start + dt; c.duration = orig.duration - dt;
-      if (media) c.trimIn = orig.trimIn + dt * c.speed;
-    }
-    b.style.left = (c.start * S.zoom) + 'px';
-    b.style.width = Math.max(8, c.duration * S.zoom) + 'px';
-    syncProps(); renderNow();
-  };
-  const up = () => {
-    window.removeEventListener('pointermove', move);
-    window.removeEventListener('pointerup', up);
-    window.removeEventListener('pointercancel', up);
-    if (moved) { commit(); renderTimeline(); }
-  };
-  window.addEventListener('pointermove', move);
-  window.addEventListener('pointerup', up);
-  window.addEventListener('pointercancel', up);
-}
-
-function scrubStart(e) {
-  if (e.button !== 0) return;
-  e.preventDefault();
-  const mv = ev => setTime(xToTime(ev.clientX));
-  const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
-  mv(e);
-  window.addEventListener('pointermove', mv);
-  window.addEventListener('pointerup', up);
-}
-
-function setZoom(z) { S.zoom = clamp(z, 4, 220); renderTimeline(); }
-
-/* ============================================================
-   ویرایش کلیپ‌ها: برش، کپی، حذف
-   ============================================================ */
-function selectedClip() { return clipById(S.sel); }
-
-function splitAtPlayhead() {
-  const t = S.time;
-  const inside = c => t > c.start + 0.05 && t < c.start + c.duration - 0.05;
-  let c = selectedClip();
-  if (!c || !inside(c)) c = S.clips.find(x => x.track !== 'subtitle' && inside(x)) || S.clips.find(inside);
-  if (!c) { say('نشانگر را وسط یک کلیپ ببر (یا اول کلیپ را انتخاب کن)'); return; }
-  const leftDur = t - c.start;
-  const right = newClip(Object.assign({}, c, { id: uid() }));
-  right.start = t;
-  right.duration = c.duration - leftDur;
-  if (isMediaClip(c)) right.trimIn = c.trimIn + leftDur * c.speed;   // نیمه‌ی دوم از همان نقطه‌ی برش ادامه می‌دهد
-  c.duration = leftDur;
-  S.clips.push(right); S.sel = right.id;
-  commit(); renderAll(); say('کلیپ برش خورد');
-}
-function duplicateClip() {
-  const c = selectedClip(); if (!c) { say('کلیپی انتخاب نشده'); return; }
-  const n = Object.assign({}, c, { id: uid(), start: c.start + c.duration });
-  S.clips.push(n); S.sel = n.id; commit(); renderAll();
-}
-function deleteClip() {
-  if (!S.sel) { say('کلیپی انتخاب نشده'); return; }
-  S.clips = S.clips.filter(c => c.id !== S.sel); S.sel = null;
-  commit(); renderAll();
-}
-function addTextClip() {
-  const c = newClip({ isText: true, track: 'video2', start: S.time, duration: 4, text: 'متن خود را بنویس', fontSize: 56, textPos: 'center' });
-  S.clips.push(c); S.sel = c.id; commit(); renderAll();
-}
-function addSubtitleClip() {
-  const c = newClip({ track: 'subtitle', start: S.time, duration: 3, text: 'زیرنویس جدید', fontSize: 36 });
-  S.clips.push(c); S.sel = c.id; commit(); renderAll();
-}
-
-/* ============================================================
-   پنل تنظیمات
-   ============================================================ */
-function allowedKinds(c) {
-  if (c.track === 'subtitle') return ['sub'];
-  const a = asset(c.assetId);
-  if (c.isText || (a && a.type === 'image')) return ['video'];
-  if (a && a.type === 'audio') return ['audio'];
-  return ['video', 'audio'];
-}
-const showText = c => c.track === 'subtitle' || isVisualClip(c) || c.isText;
-
-const FIELDS = [
-  { k: 'track', label: 'ترک', type: 'select', show: c => c.track !== 'subtitle',
-    opts: c => TRACKS.filter(t => allowedKinds(c).includes(t.kind)).map(t => [t.key, t.label]),
-    get: c => c.track, set: (c, v) => { c.track = v; } },
-  { k: 'start', label: 'شروع روی تایم‌لاین (ثانیه)', type: 'number', step: 0.1, min: 0,
-    get: c => c.start.toFixed(2), set: (c, v) => { c.start = Math.max(0, v); } },
-  { k: 'duration', label: 'مدت کلیپ (ثانیه)', type: 'number', step: 0.1, min: 0.1,
-    get: c => c.duration.toFixed(2), set: (c, v) => { c.duration = clamp(v, 0.1, maxDur(c)); } },
-  { k: 'speed', label: 'سرعت پخش', type: 'select', num: true, show: isMediaClip,
-    opts: () => SPEEDS.map(s => [s, s + '×']),
-    get: c => c.speed,
-    set: (c, v) => { const src = c.duration * c.speed; c.speed = v; c.duration = Math.max(0.1, src / v); } },   // مدت متناسب با سرعت عوض می‌شود
-  { k: 'trimIn', label: 'شروع از ثانیه‌ی … فایل اصلی', type: 'number', step: 0.1, min: 0, show: isMediaClip,
-    get: c => c.trimIn.toFixed(2),
-    set: (c, v) => { const a = asset(c.assetId); c.trimIn = clamp(v, 0, Math.max(0, (a.duration || 1e9) - 0.1)); c.duration = Math.min(c.duration, maxDur(c)); } },
-  { sec: 'صدا', show: isMediaClip },
-  { k: 'volume', label: 'حجم صدا', type: 'range', min: 0, max: 200, unit: '%', show: isMediaClip, get: c => c.volume, set: (c, v) => { c.volume = v; } },
-  { sec: 'محو شدن', show: c => c.track !== 'subtitle' },
-  { k: 'fadeIn', label: 'محو شدن ابتدا (ثانیه)', type: 'range', min: 0, max: 5, step: 0.1, show: c => c.track !== 'subtitle', get: c => c.fadeIn, set: (c, v) => { c.fadeIn = v; } },
-  { k: 'fadeOut', label: 'محو شدن انتها (ثانیه)', type: 'range', min: 0, max: 5, step: 0.1, show: c => c.track !== 'subtitle', get: c => c.fadeOut, set: (c, v) => { c.fadeOut = v; } },
-  { sec: 'تصویر', show: isVisualClip },
-  { k: 'brightness', label: 'روشنایی', type: 'range', min: 0, max: 200, unit: '%', show: isVisualClip, get: c => c.brightness, set: (c, v) => { c.brightness = v; } },
-  { k: 'contrast', label: 'کنتراست', type: 'range', min: 0, max: 250, unit: '%', show: isVisualClip, get: c => c.contrast, set: (c, v) => { c.contrast = v; } },
-  { k: 'saturation', label: 'اشباع رنگ', type: 'range', min: 0, max: 250, unit: '%', show: isVisualClip, get: c => c.saturation, set: (c, v) => { c.saturation = v; } },
-  { k: 'opacity', label: 'شفافیت', type: 'range', min: 0, max: 100, unit: '%', show: isVisualClip, get: c => c.opacity, set: (c, v) => { c.opacity = v; } },
-  { k: 'rotation', label: 'چرخش', type: 'select', num: true, show: isVisualClip,
-    opts: () => [[0, '۰°'], [90, '۹۰°'], [180, '۱۸۰°'], [270, '۲۷۰°']], get: c => c.rotation, set: (c, v) => { c.rotation = v; } },
-  { k: 'filter', label: 'فیلتر رنگ', type: 'select', show: isVisualClip, opts: () => FILTERS, get: c => c.filter, set: (c, v) => { c.filter = v; } },
-  { k: 'scale', label: 'اندازه', type: 'range', min: 10, max: 300, unit: '%', show: isVisualClip, get: c => c.scale, set: (c, v) => { c.scale = v; } },
-  { k: 'posX', label: 'جابه‌جایی افقی', type: 'range', min: -100, max: 100, unit: '%', show: isVisualClip, get: c => c.posX, set: (c, v) => { c.posX = v; } },
-  { k: 'posY', label: 'جابه‌جایی عمودی', type: 'range', min: -100, max: 100, unit: '%', show: isVisualClip, get: c => c.posY, set: (c, v) => { c.posY = v; } },
-  { sec: 'متن', show: showText },
-  { k: 'text', label: 'متن', type: 'textarea', show: showText, get: c => c.text, set: (c, v) => { c.text = v; } },
-  { k: 'textColor', label: 'رنگ متن', type: 'color', show: showText, get: c => c.textColor, set: (c, v) => { c.textColor = v; } },
-  { k: 'fontSize', label: 'اندازه متن', type: 'number', min: 8, max: 200, step: 1, show: showText, get: c => c.fontSize, set: (c, v) => { c.fontSize = clamp(v, 8, 200); } },
-  { k: 'textPos', label: 'جای متن', type: 'select', show: c => c.track !== 'subtitle' && showText(c),
-    opts: () => [['bottom', 'پایین'], ['center', 'وسط'], ['top', 'بالا']], get: c => c.textPos, set: (c, v) => { c.textPos = v; } }
-];
-let propInputs = {};
-
-function typeLabel(c) {
-  if (c.track === 'subtitle') return 'زیرنویس';
-  if (c.isText) return 'متن';
-  const a = asset(c.assetId);
-  if (!a) return 'کلیپ';
-  return kindOf(c.track) === 'audio' ? 'صدا' : a.type === 'image' ? 'تصویر' : 'ویدیو';
-}
-
-function renderProps() {
-  const box = $('props'); box.innerHTML = ''; propInputs = {};
-  const c = selectedClip();
-  if (!c) {
-    $('selectedType').textContent = 'بدون انتخاب';
-    box.append(el('div', 'notice', 'یک کلیپ را روی تایم‌لاین انتخاب کن تا تنظیماتش باز شود.\n\nمیانبرها: Space پخش · S برش · Delete حذف · Ctrl+Z بازگشت · Ctrl+D کپی · ← → حرکت نشانگر'));
-    return;
-  }
-  $('selectedType').textContent = typeLabel(c);
-  for (const f of FIELDS) {
-    if (f.show && !f.show(c)) continue;
-    if (f.sec) { box.append(el('div', 'sec', f.sec)); continue; }
-    const wrap = el('div', 'field');
-    const lab = el('label'); lab.append(el('span', null, f.label));
-    const badge = el('b'); lab.append(badge);
-    let input;
-    if (f.type === 'select') {
-      input = el('select');
-      f.opts(c).forEach(([v, t]) => { const o = el('option', null, t); o.value = v; input.append(o); });
-    } else if (f.type === 'textarea') { input = el('textarea'); input.rows = 3; }
-    else { input = el('input'); input.type = f.type; }
-    ['min', 'max', 'step'].forEach(p => { if (f[p] != null) input.setAttribute(p, f[p]); });
-    wrap.append(lab, input); box.append(wrap);
-    propInputs[f.k] = { f, input, badge };
-
-    const read = () => f.type === 'select' ? (f.num ? Number(input.value) : input.value)
-      : (f.type === 'number' || f.type === 'range') ? parseFloat(input.value) : input.value;
-    const apply = () => {
-      const v = read();
-      if ((f.type === 'number' || f.type === 'range') && !Number.isFinite(v)) return false;
-      f.set(c, v); afterEdit(); return true;
-    };
-    if (f.type === 'range' || f.type === 'textarea' || f.type === 'color') input.addEventListener('input', apply);
-    input.addEventListener('change', () => { apply(); commit(); syncProps(); });
-  }
-  const acts = el('div', 'propactions');
-  const rs = el('button', null, 'بازنشانی افکت‌ها'); rs.onclick = () => { Object.assign(c, FX_DEFAULTS, { speed: c.speed, duration: c.duration }); commit(); renderAll(); };
-  acts.append(rs);
-  box.append(acts);
-  syncProps();
-}
-
-/* مقدار ورودی‌های پنل را با وضعیت فعلی کلیپ هماهنگ می‌کند (بجز ورودی‌ای که کاربر در آن تایپ می‌کند) */
-function syncProps() {
-  const c = selectedClip(); if (!c) return;
-  for (const k in propInputs) {
-    const { f, input, badge } = propInputs[k];
-    if (document.activeElement !== input) input.value = f.get(c);
-    if (f.type === 'range') badge.textContent = f.get(c) + (f.unit || '');
-  }
-}
-function afterEdit() { renderTimeline(); syncProps(); renderNow(); }
-
-/* ============================================================
-   زیرنویس
-   ============================================================ */
-async function readTextSmart(file) {
-  const buf = await file.arrayBuffer();
-  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf).replace(/^﻿/, ''); }
-  catch (e) { try { return new TextDecoder('windows-1256').decode(buf); } catch (e2) { return new TextDecoder().decode(buf); } }
-}
-function parseTime(x) {
-  const m = x.trim().split(/\s+/)[0].match(/(?:(\d+):)?(\d+):(\d+(?:[.,]\d+)?)/);
-  return m ? (+(m[1] || 0)) * 3600 + (+m[2]) * 60 + parseFloat(m[3].replace(',', '.')) : 0;
-}
-function parseSubtitles(text) {
-  const items = [];
-  for (const block of text.replace(/\r/g, '').trim().split(/\n\s*\n/)) {
-    const lines = block.split('\n'), idx = lines.findIndex(l => l.includes('-->'));
-    if (idx < 0) continue;
-    const [a, b] = lines[idx].split('-->');
-    const txt = lines.slice(idx + 1).join('\n').replace(/<[^>]*>/g, '').trim();
-    if (txt) items.push({ start: parseTime(a), end: parseTime(b), text: txt });
-  }
-  return items;
-}
-async function importSubtitleFile(file) {
-  const items = parseSubtitles(await readTextSmart(file));
-  if (!items.length) { say('فرمت زیرنویس قابل تشخیص نبود'); return; }
-  S.clips = S.clips.filter(c => c.track !== 'subtitle');
-  items.forEach(s => S.clips.push(newClip({ track: 'subtitle', start: s.start, duration: Math.max(0.1, s.end - s.start), text: s.text, fontSize: 36 })));
-  S.sel = null; commit(); renderAll();
-  say(`${items.length} زیرنویس وارد شد`);
-}
-function srtStamp(t) {
-  const ms = Math.round(t * 1000), p = (n, l = 2) => String(n).padStart(l, '0');
-  return `${p(Math.floor(ms / 3600000))}:${p(Math.floor(ms / 60000) % 60)}:${p(Math.floor(ms / 1000) % 60)},${p(ms % 1000, 3)}`;
-}
-function exportSrt() {
-  const subs = S.clips.filter(c => c.track === 'subtitle').sort((a, b) => a.start - b.start);
-  if (!subs.length) { say('زیرنویسی روی تایم‌لاین نیست'); return; }
-  const txt = subs.map((c, i) => `${i + 1}\n${srtStamp(c.start)} --> ${srtStamp(c.start + c.duration)}\n${c.text}\n`).join('\n');
-  download(new Blob(['﻿' + txt], { type: 'text/plain;charset=utf-8' }), 'subtitles.srt');
-}
-
-/* ============================================================
-   ذخیره و بازکردن پروژه
-   ============================================================ */
-function download(blob, name) {
-  const url = URL.createObjectURL(blob), a = document.createElement('a');
-  a.href = url; a.download = name; document.body.append(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 15000);
-}
-function projectData() {
-  return {
-    app: 'CutLab', version: 3, W: S.W, H: S.H, zoom: S.zoom, idN: S.idN, mute: S.mute, hidden: S.hidden,
-    assets: S.assets.map(a => ({ id: a.id, name: a.name, size: a.size, type: a.type, duration: a.duration })),
-    clips: S.clips
-  };
-}
-function resetEngineAndAssets(keep) {
-  pause(); pv.dropAll();
-  S.assets.forEach(a => { if (a.url && !keep.includes(a)) URL.revokeObjectURL(a.url); });
-}
-
-/* پروژه را بارگذاری می‌کند؛ فایل‌هایی که در pool هستند خودکار وصل می‌شوند، بقیه «گم‌شده» می‌مانند تا دوباره اضافه شوند */
-function loadProjectData(d, pool) {
-  const used = [];
-  const assets = (d.assets || []).map(m => {
-    const a = { id: m.id, name: m.name, size: m.size, type: m.type, duration: m.duration || 0, missing: true };
-    const cands = pool.filter(p => !used.includes(p) && p.name === m.name);
-    const p = cands.find(x => x.size === m.size) || cands[0];
-    if (p) {
-      used.push(p);
-      Object.assign(a, { file: p.file, url: p.url, img: p.img, w: p.w, h: p.h, missing: false, duration: p.duration || a.duration });
-    }
-    return a;
-  });
-  resetEngineAndAssets(used);
-  S.assets = assets;
-  S.clips = (d.clips || []).map(c => Object.assign(newClip({}), c));
-  S.W = d.W || 1280; S.H = d.H || 720; S.zoom = d.zoom || 42;
-  S.mute = d.mute || {}; S.hidden = d.hidden || {};
-  S.idN = Math.max(d.idN || 1, ...S.assets.map(a => a.id + 1), ...S.clips.map(c => c.id + 1), 1);
-  S.sel = null; S.time = 0;
-  applyCanvasSize(); resetHistory(); renderAll();
-}
-
-async function openProjectFile(file) {
-  let d;
-  try { d = JSON.parse(await file.text()); } catch (e) { say('فایل پروژه معتبر نیست'); return; }
-  if (!d || d.version !== 3 || !Array.isArray(d.assets) || !Array.isArray(d.clips)) { say('این فایل پروژه با نسخه‌ی جدید سازگار نیست'); return; }
-  if (S.clips.length && !confirm('پروژه‌ی فعلی با این پروژه جایگزین شود؟')) return;
-  loadProjectData(d, S.assets.filter(a => a.file));
-  DB.clear('media').then(() => Promise.all(S.assets.filter(a => a.file).map(a => DB.put('media', a.id, a.file)))).catch(dbWarn);
-  scheduleAutosave();
-  const miss = S.assets.filter(a => a.missing).length;
-  say(miss ? `پروژه باز شد؛ ${miss} فایل پیدا نشد. همان فایل‌ها را دوباره اضافه کن تا خودکار وصل شوند` : 'پروژه باز شد');
-}
-
-async function newProject() {
-  if ((S.assets.length || S.clips.length) && !confirm('همه‌ی رسانه‌ها و کلیپ‌ها پاک شوند؟')) return;
-  resetEngineAndAssets([]);
-  S.assets = []; S.clips = []; S.sel = null; S.time = 0; S.mute = {}; S.hidden = {};
-  resetHistory(); renderAll();
-  DB.clear('media').catch(() => {}); DB.del('kv', 'project').catch(() => {});
-}
-
-async function restoreAutosave() {
-  try {
-    const d = await DB.get('kv', 'project');
-    if (!d || d.version !== 3 || !(d.assets && d.assets.length)) return;
-    loadProjectData(d, []);
-    for (const a of S.assets) {
-      const f = await DB.get('media', a.id).catch(() => null);
-      if (f) attachFile(a, f, a.type);
-    }
-    renderAll();
-    say('پروژه‌ی قبلی بازیابی شد');
-  } catch (e) { /* حافظه‌ی مرورگر در دسترس نیست */ }
-}
-
-/* ============================================================
-   خروجی ویدیو (تصویر + صدا + متن + محو شدن)
-   ============================================================ */
-const MIMES = {
-  webm: ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'],
-  mp4: ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a', 'video/mp4']
-};
-function pickMime(kind) { return (MIMES[kind] || []).find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || null; }
-
-let exportCancelled = false, exportRunning = false;
-function openExport() {
-  if (!contentEnd()) { say('اول ویدیو، تصویر یا متن را به تایم‌لاین اضافه کن'); return; }
-  if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { say('این مرورگر از ساخت خروجی پشتیبانی نمی‌کند؛ Chrome را امتحان کن'); return; }
-  const sel = $('exportFormat'); sel.innerHTML = '';
-  if (pickMime('mp4')) sel.append(new Option('MP4 (سازگار با همه‌جا)', 'mp4'));
-  if (pickMime('webm')) sel.append(new Option('WebM', 'webm'));
-  if (!sel.options.length) { say('هیچ قالب خروجی‌ای در این مرورگر پشتیبانی نمی‌شود'); return; }
-  $('exportOpts').hidden = false; $('exportProg').hidden = true; $('exportModal').hidden = false;
-}
-
-async function runExport() {
-  if (exportRunning) return;
-  const kind = $('exportFormat').value, mime = pickMime(kind);
-  const bitrate = +$('exportBitrate').value;
-  const end = contentEnd();
-  pause();
-  exportRunning = true; exportCancelled = false;
-  $('exportOpts').hidden = true; $('exportProg').hidden = false;
-  const msg = t => { $('exportMsg').textContent = t; };
-  msg('آماده‌سازی…'); $('exportBar').style.width = '0%';
-
-  const canvas = document.createElement('canvas'); canvas.width = S.W; canvas.height = S.H;
-  const ex = new Engine(canvas, true);
-  ex.initAudio(); ex.resume();
-  try {
-    ex.render(0, false);
-    // صبر می‌کنیم تا اولین فریم‌ها آماده شوند تا ابتدای خروجی سیاه نباشد
-    const t0w = performance.now();
-    while (performance.now() - t0w < 4000) {
-      const els = [...ex.media.values()].map(r => r.el);
-      if (els.every(e => e.readyState >= 2)) break;
-      await sleep(60); ex.render(0, false);
-    }
-    const stream = canvas.captureStream(30);
-    if (ex.dest) ex.dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
-    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: bitrate, audioBitsPerSecond: 192000 });
-    const chunks = [];
-    rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-    const stopped = new Promise(r => { rec.onstop = r; });
-    rec.start(500);
-    const t0 = performance.now();
-    await new Promise(resolve => {
-      const timer = setInterval(() => {
-        const t = (performance.now() - t0) / 1000;
-        if (exportCancelled || t >= end) { clearInterval(timer); resolve(); return; }
-        ex.render(t, true);
-        $('exportBar').style.width = (t / end * 100).toFixed(1) + '%';
-        msg(`در حال ساخت خروجی… ${Math.floor(t / end * 100)}٪ — تب را باز نگه دار`);
-      }, 1000 / 30);
-    });
-    ex.draw(Math.min(end, (performance.now() - t0) / 1000));
-    await sleep(300);       // انتهای صدا هم ضبط شود
-    rec.stop(); await stopped;
-    if (!exportCancelled) {
-      const blob = new Blob(chunks, { type: mime.split(';')[0] });
-      download(blob, 'cutlab-export.' + kind);
-      say(`خروجی آماده شد (${(blob.size / 1048576).toFixed(1)} مگابایت)`);
-    } else say('ساخت خروجی لغو شد');
-  } catch (err) {
-    say('ساخت خروجی ناموفق بود: ' + (err && err.message || err));
-  } finally {
-    ex.dropAll();
-    if (ex.ac) ex.ac.close().catch(() => {});
-    exportRunning = false; $('exportModal').hidden = true;
-    renderNow();
-  }
-}
-
-/* ============================================================
-   اتصال دکمه‌ها و میانبرها
-   ============================================================ */
-function renderAll() {
-  renderLibrary(); renderTimeline(); renderProps(); renderNow(); updateButtons();
-}
-
-$('importBtn').onclick = () => $('fileInput').click();
-$('fileInput').onchange = e => { Array.from(e.target.files).forEach(importFile); e.target.value = ''; };
-$('subtitleBtn').onclick = () => $('subtitleInput').click();
-$('subtitleInput').onchange = e => { const f = e.target.files[0]; if (f) importSubtitleFile(f); e.target.value = ''; };
-$('saveProject').onclick = () => {
-  download(new Blob([JSON.stringify(projectData(), null, 2)], { type: 'application/json' }), 'cutlab-project.json');
-  say('پروژه ذخیره شد. برای بازکردن، پروژه را باز کن و فایل‌های رسانه را دوباره اضافه کن تا خودکار وصل شوند');
-};
-$('loadProjectBtn').onclick = () => $('loadProjectInput').click();
-$('loadProjectInput').onchange = e => { const f = e.target.files[0]; if (f) openProjectFile(f); e.target.value = ''; };
-$('clearMedia').onclick = newProject;
-$('exportBtn').onclick = openExport;
-$('exportStart').onclick = runExport;
-$('exportClose').onclick = () => { $('exportModal').hidden = true; };
-$('exportCancel').onclick = () => { exportCancelled = true; };
-
-$('playBtn').onclick = togglePlay;
-$('toStart').onclick = () => setTime(0);
-$('toEnd').onclick = () => setTime(contentEnd());
-$('backBtn').onclick = () => setTime(S.time - 5);
-$('forwardBtn').onclick = () => setTime(S.time + 5);
-$('addText').onclick = addTextClip;
-$('addSub').onclick = addSubtitleClip;
-$('splitBtn').onclick = splitAtPlayhead;
-$('dupBtn').onclick = duplicateClip;
-$('delBtn').onclick = deleteClip;
-$('undoBtn').onclick = undo;
-$('redoBtn').onclick = redo;
-$('zoomIn').onclick = () => setZoom(S.zoom * 1.3);
-$('zoomOut').onclick = () => setZoom(S.zoom / 1.3);
-$('fitTimeline').onclick = () => setZoom(($('tl').clientWidth - LABEL - 24) / Math.max(5, contentEnd()));
-$('srtOut').onclick = exportSrt;
-$('ruler').addEventListener('pointerdown', scrubStart);
-$('tl').addEventListener('wheel', e => { if (e.ctrlKey) { e.preventDefault(); setZoom(S.zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15)); } }, { passive: false });
-$('sizeSel').onchange = e => {
-  const [w, h] = e.target.value.split('x').map(Number);
-  S.W = w; S.H = h; applyCanvasSize(); commit(); renderNow();
-};
-
-window.addEventListener('keydown', e => {
-  const tag = (e.target.tagName || '').toLowerCase();
-  if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
-  if (!$('exportModal').hidden) return;
-  const k = e.key.toLowerCase(), ctrl = e.ctrlKey || e.metaKey;
-  if (ctrl && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
-  else if (ctrl && k === 'y') { e.preventDefault(); redo(); }
-  else if (ctrl && k === 'd') { e.preventDefault(); duplicateClip(); }
-  else if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-  else if (k === 's' && !ctrl) { e.preventDefault(); splitAtPlayhead(); }
-  else if (k === 'delete' || k === 'backspace') { e.preventDefault(); deleteClip(); }
-  else if (k === 'arrowleft') { e.preventDefault(); setTime(S.time - (e.shiftKey ? 1 : 0.1)); }
-  else if (k === 'arrowright') { e.preventDefault(); setTime(S.time + (e.shiftKey ? 1 : 0.1)); }
-  else if (k === 'home') { e.preventDefault(); setTime(0); }
-  else if (k === 'end') { e.preventDefault(); setTime(contentEnd()); }
-});
-
-// کشیدن و رها کردن فایل‌ها روی صفحه
-let dragDepth = 0;
-window.addEventListener('dragenter', e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { dragDepth++; document.body.classList.add('dropping'); } });
-window.addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) document.body.classList.remove('dropping'); });
-window.addEventListener('dragover', e => e.preventDefault());
-window.addEventListener('drop', e => {
-  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dropping');
-  Array.from(e.dataTransfer.files || []).forEach(importFile);
-});
-window.addEventListener('beforeunload', () => { clearTimeout(autosaveTimer); try { DB.put('kv', 'project', projectData()); } catch (e) {} });
-
-/* شروع */
-applyCanvasSize();
-resetHistory();
-renderAll();
-restoreAutosave();
-
-})();
-</script>
-</body>
-</html>
+<script src="data.js"></script>
+<script src="core.js"></script>
+<script src="enemies.js"></script>
+<script src="draw.js"></script>
+<script src="render.js"></script>
+<script src="ui.js"></script>
