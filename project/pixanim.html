@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14141c">
+<title>پیکس‌انیم</title>
+<style>
+:root{--bg:#14141c;--panel:#1e1e2a;--panel2:#2a2a3a;--line:#38384c;--txt:#e9e9f2;--mut:#9a9ab0;--acc:#7c6cff;--ok:#38d9a9;--danger:#ff5d6c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;overflow:hidden;overscroll-behavior:none}
+#app{display:flex;flex-direction:column;height:100dvh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+button{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 10px;cursor:pointer}
+button:active{filter:brightness(1.35)}
+button:disabled{opacity:.35}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+button.danger{color:var(--danger)}
+input,select{font:inherit;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;-webkit-user-select:text;user-select:text}
+input[type=range]{padding:0;height:28px;accent-color:var(--acc)}
+input[type=checkbox]{width:auto}
+#top{display:flex;align-items:center;gap:6px;padding:6px;background:var(--panel);border-bottom:1px solid var(--line)}
+#top button{width:40px;height:38px;padding:0;font-size:17px;flex:0 0 auto}
+#nameBtn{flex:1;min-width:0;width:auto!important;text-align:start;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#nameBtn small{display:block;font-size:10px;color:var(--mut)}
+#vp{flex:1;position:relative;overflow:hidden;background:#0c0c12;touch-action:none;min-height:80px}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;background-color:#d8d8d8;background-image:conic-gradient(#b5b5b5 25%,transparent 0 50%,#b5b5b5 0 75%,transparent 0);background-size:4px 4px;box-shadow:0 0 0 1px #000}
+#stage canvas,#stage img{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
+#refImg{object-fit:contain;image-rendering:auto!important;z-index:1}
+#onP{z-index:2;filter:sepia(1) saturate(6) hue-rotate(-50deg);opacity:.4}
+#onN{z-index:3;filter:sepia(1) saturate(6) hue-rotate(80deg);opacity:.35}
+#cv{z-index:4}
+#grid{position:absolute;left:0;top:0;pointer-events:none;z-index:6}
+#tools{display:flex;gap:4px;overflow-x:auto;padding:5px;background:var(--panel);border-top:1px solid var(--line);scrollbar-width:none}
+.tb{flex:0 0 auto;width:54px;height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:10px;padding:2px;line-height:1.2}
+.tb i{font-style:normal;font-size:18px}
+.sep{flex:0 0 1px;background:var(--line);margin:4px 2px}
+#palRow{display:flex;gap:6px;align-items:center;padding:5px;background:var(--panel);border-top:1px solid var(--line)}
+#curCol{flex:0 0 44px;height:40px;border-radius:10px;border:2px solid #fff;padding:0}
+#pal{display:flex;gap:4px;overflow-x:auto;flex:1;scrollbar-width:none}
+.sw{flex:0 0 26px;height:30px;border-radius:6px;border:2px solid transparent;outline:1px solid #0006}
+.sw.sel{border-color:#fff}
+#tl{background:var(--panel);border-top:1px solid var(--line)}
+#tlCtl{display:flex;gap:5px;overflow-x:auto;padding:5px;align-items:center;scrollbar-width:none}
+#tlCtl button{flex:0 0 auto;height:34px;padding:0 10px;font-size:13px;white-space:nowrap}
+.grp{display:flex;align-items:center;gap:4px;flex:0 0 auto;font-size:12px;color:var(--mut)}
+.grp b{color:var(--txt);min-width:22px;text-align:center}
+#strip{display:flex;gap:6px;overflow-x:auto;padding:4px 6px 8px;position:relative}
+.fr{flex:0 0 auto;min-width:58px;border:2px solid var(--line);border-radius:8px;background:var(--panel2);padding:3px;text-align:center;font-size:11px;color:var(--mut)}
+.fr.sel{border-color:var(--acc);color:#fff}
+.fr canvas{display:block;margin:0 auto 2px;image-rendering:pixelated;background-color:#d8d8d8;background-image:conic-gradient(#b5b5b5 25%,transparent 0 50%,#b5b5b5 0 75%,transparent 0);background-size:6px 6px;border-radius:3px}
+.back{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+.sheet{width:100%;max-width:560px;max-height:88dvh;background:var(--panel);border-radius:18px 18px 0 0;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+.sh{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.sh button{width:34px;height:34px;padding:0}
+.sb{overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1}
+.lab{font-size:12px;color:var(--mut);margin-bottom:-4px}
+.card{display:flex;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:8px}
+.card img{width:52px;height:52px;object-fit:contain;image-rendering:pixelated;background:#222;border-radius:6px}
+.card .t{flex:1;min-width:0}
+.card .t div:first-child{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.card .t small{color:var(--mut)}
+.card button{flex:0 0 auto}
+#toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#000c;color:#fff;padding:8px 14px;border-radius:20px;font-size:13px;z-index:99;pointer-events:none;opacity:0;transition:opacity .2s;max-width:86vw;text-align:center}
+#toast.show{opacity:1}
+.hint{font-size:12px;color:var(--mut);line-height:1.7}
+.prog{height:8px;border-radius:4px;background:var(--panel2);overflow:hidden}
+.prog div{height:100%;width:0;background:var(--ok)}
+.lrow{display:flex;gap:6px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:6px}
+.lrow.sel{border-color:var(--acc)}
+.lrow .nm{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:6px}
+.lrow button{width:34px;height:34px;padding:0;flex:0 0 auto}
+#svc{width:100%;height:170px;border-radius:10px;touch-action:none;display:block}
+#hue{background:linear-gradient(90deg,red,#ff0,#0f0,#0ff,#00f,#f0f,red)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top" dir="ltr">
+    <button id="bMenu" title="پروژه‌ها">☰</button>
+    <button id="nameBtn"><span id="nameTxt">—</span><small id="saveInd"></small></button>
+    <button id="bUndo" title="برگردان">↶</button>
+    <button id="bRedo" title="جلو">↷</button>
+    <button id="bFit" title="جا دادن">⛶</button>
+    <button id="bExport" title="خروجی">⬇</button>
+  </div>
+  <div id="vp">
+    <div id="stage">
+      <img id="refImg" alt="">
+      <canvas id="onP"></canvas>
+      <canvas id="onN"></canvas>
+      <canvas id="cv"></canvas>
+    </div>
+    <canvas id="grid"></canvas>
+  </div>
+  <div id="tools" dir="ltr"></div>
+  <div id="palRow" dir="ltr"><button id="curCol"></button><div id="pal"></div><button id="bAddCol" style="flex:0 0 40px;height:36px;padding:0">＋</button></div>
+  <div id="tl" dir="ltr">
+    <div id="tlCtl"></div>
+    <div id="strip"></div>
+  </div>
+</div>
+<div id="toast"></div>
+<input type="file" id="fileRef" accept="image/*" hidden>
+<input type="file" id="fileProj" accept=".pixanim,.json,application/json,application/octet-stream,*/*" hidden>
+
+<script>
+'use strict';
+// ==LIB==
+const crcTable=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=crcTable[(c^u8[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function makeZip(files){
+  const enc=new TextEncoder(),parts=[],central=[];let offset=0;
+  for(const f of files){
+    const name=enc.encode(f.name),crc=crc32(f.data),size=f.data.length;
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,0,true);
+    lh.setUint16(10,0,true);lh.setUint16(12,0x21,true);lh.setUint32(14,crc,true);lh.setUint32(18,size,true);lh.setUint32(22,size,true);
+    lh.setUint16(26,name.length,true);lh.setUint16(28,0,true);
+    parts.push(new Uint8Array(lh.buffer),name,f.data);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(10,0,true);
+    ch.setUint16(12,0,true);ch.setUint16(14,0x21,true);ch.setUint32(16,crc,true);ch.setUint32(20,size,true);ch.setUint32(24,size,true);
+    ch.setUint16(28,name.length,true);ch.setUint32(42,offset,true);
+    central.push(new Uint8Array(ch.buffer),name);
+    offset+=30+name.length+size;
+  }
+  let csize=0;for(const c of central)csize+=c.length;
+  const end=new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);end.setUint32(12,csize,true);end.setUint32(16,offset,true);
+  return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:'application/zip'});
+}
+function lzwEncode(px,minCode){
+  const clear=1<<minCode,eoi=clear+1;
+  let codeSize=minCode+1,next=eoi+1;
+  const dict=new Map();
+  let out=new Uint8Array(Math.ceil(px.length*1.6)+1024),op=0,cur=0,bits=0;
+  function emit(c){cur|=c<<bits;bits+=codeSize;while(bits>=8){out[op++]=cur&255;cur>>>=8;bits-=8}}
+  emit(clear);
+  let prefix=px[0];
+  for(let i=1;i<px.length;i++){
+    const k=px[i],key=prefix*256+k,v=dict.get(key);
+    if(v!==undefined){prefix=v;continue}
+    emit(prefix);
+    if(next>=(1<<codeSize)&&codeSize<12)codeSize++;
+    if(next<4096){dict.set(key,next++)}
+    else{emit(clear);dict.clear();codeSize=minCode+1;next=eoi+1}
+    prefix=k;
+  }
+  emit(prefix);emit(eoi);if(bits>0)out[op++]=cur&255;
+  return out.subarray(0,op);
+}
+class GifWriter{
+  constructor(w,h,palette,trans){
+    this.w=w;this.h=h;this.trans=trans;this.parts=[];
+    this.parts.push(Uint8Array.from([71,73,70,56,57,97,w&255,w>>8,h&255,h>>8,0xF7,0,0]));
+    const g=new Uint8Array(768);palette.forEach((c,i)=>{if(i<256){g[i*3]=c[0];g[i*3+1]=c[1];g[i*3+2]=c[2]}});
+    this.parts.push(g);
+    this.parts.push(Uint8Array.from([0x21,0xFF,11,78,69,84,83,67,65,80,69,50,46,48,3,1,0,0,0]));
+  }
+  add(px,delay){
+    const t=this.trans>=0?1:0,d=Math.max(2,delay|0);
+    this.parts.push(Uint8Array.from([0x21,0xF9,4,(2<<2)|t,d&255,d>>8,t?this.trans:0,0]));
+    this.parts.push(Uint8Array.from([0x2C,0,0,0,0,this.w&255,this.w>>8,this.h&255,this.h>>8,0,8]));
+    const data=lzwEncode(px,8);
+    const nb=Math.ceil(data.length/255),blk=new Uint8Array(data.length+nb+1);let p=0;
+    for(let i=0;i<data.length;i+=255){const n=Math.min(255,data.length-i);blk[p++]=n;blk.set(data.subarray(i,i+n),p);p+=n}
+    blk[p++]=0;this.parts.push(blk.subarray(0,p));
+  }
+  finish(){this.parts.push(Uint8Array.from([0x3B]));return new Blob(this.parts,{type:'image/gif'})}
+}
+function buildPalette(counts,hasT){
+  const cols=[...counts.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  const pal=cols.slice(0,hasT?255:256),map=new Map();
+  pal.forEach((v,i)=>map.set(v,i));
+  const rgb=pal.map(v=>[v&255,(v>>8)&255,(v>>16)&255]);
+  const trans=hasT?pal.length:-1;if(hasT)rgb.push([0,0,0]);
+  const idxOf=v=>{
+    let m=map.get(v);if(m!==undefined)return m;
+    const r=v&255,g=(v>>8)&255,b=(v>>16)&255;let best=0,bd=1e12;
+    for(let i=0;i<pal.length;i++){const p=pal[i],dr=(p&255)-r,dg=((p>>8)&255)-g,db=((p>>16)&255)-b,d=dr*dr+dg*dg+db*db;if(d<bd){bd=d;best=i}}
+    map.set(v,best);return best;
+  };
+  return{palette:rgb,trans,idxOf};
+}
+function scaleIdx(src,w,h,s){
+  if(s===1)return src;const W=w*s,o=new Uint8Array(W*h*s);
+  for(let y=0;y<h;y++){const row=y*s*W;for(let x=0;x<w;x++){const v=src[y*w+x];for(let k=0;k<s;k++)o[row+x*s+k]=v}for(let k=1;k<s;k++)o.copyWithin(row+k*W,row,row+W)}
+  return o;
+}
+// ==/LIB==
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function h(tag,attrs,...kids){
+  const e=document.createElement(tag);
+  if(attrs)for(const k in attrs){const v=attrs[k];
+    if(k==='class')e.className=v;else if(k==='style')e.style.cssText=v;
+    else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);
+    else if(k==='value'||k==='checked'||k==='disabled'||k==='textContent')e[k]=v;
+    else if(v!==false&&v!=null)e.setAttribute(k,v===true?'':v)}
+  for(const kid of kids.flat())if(kid!=null&&kid!==false)e.append(kid.nodeType?kid:document.createTextNode(kid));
+  return e;
+}
+let toastT;
+function toast(msg,ms=1800){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms)}
+function sheet(title,build,opts={}){
+  const back=h('div',{class:'back'}),box=h('div',{class:'sheet'});
+  const close=()=>{back.remove();opts.onclose&&opts.onclose()};
+  box.append(h('div',{class:'sh'},h('b',null,title),h('button',{onclick:close},'✕')));
+  const body=h('div',{class:'sb'});box.append(body);
+  back.append(box);back.addEventListener('pointerdown',e=>{if(e.target===back)close()});
+  document.body.append(back);build(body,close);return close;
+}
+function askText(title,val){return new Promise(res=>{let d=false;const fin=v=>{if(!d){d=true;res(v)}};
+  sheet(title,(b,cl)=>{const inp=h('input',{type:'text',value:val||''});
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){fin(inp.value.trim());cl()}});
+    b.append(inp,h('div',{class:'row'},h('button',{class:'on',onclick:()=>{fin(inp.value.trim());cl()}},'تأیید'),h('button',{onclick:()=>{fin(null);cl()}},'لغو')));
+    setTimeout(()=>inp.focus(),60)},{onclose:()=>fin(null)})})}
+function askConfirm(msg,okText='بله'){return new Promise(res=>{let d=false;const fin=v=>{if(!d){d=true;res(v)}};
+  sheet('مطمئنی؟',(b,cl)=>{b.append(h('div',null,msg),h('div',{class:'row'},h('button',{class:'danger',onclick:()=>{fin(true);cl()}},okText),h('button',{onclick:()=>{fin(false);cl()}},'لغو')))},{onclose:()=>fin(false)})})}
+
+/* ---------- colors ---------- */
+const h2p=hex=>{const n=parseInt(hex,16);return((255<<24)|((n&255)<<16)|(n&0xff00)|((n>>16)&255))>>>0};
+const p2h=p=>[p&255,(p>>8)&255,(p>>16)&255].map(v=>v.toString(16).padStart(2,'0')).join('');
+const DEFAULT_PALETTE=['000000','222034','45283c','663931','8f563b','df7126','d9a066','eec39a','fbf236','99e550','6abe30','37946e','4b692f','524b24','323c39','3f3f74','306082','5b6ee1','639bff','5fcde4','cbdbfc','ffffff','9badb7','847e87','696a6a','595652','76428a','ac3232','d95763','d77bba','8f974a','8a6f30'].map(h2p);
+function hsv2rgb(hh,s,v){const f=(n,k=(n+hh/60)%6)=>v-v*s*Math.max(0,Math.min(k,4-k,1));return[f(5),f(3),f(1)].map(x=>Math.round(x*255))}
+function rgb2hsv(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let hh=0;if(d){if(mx===r)hh=((g-b)/d)%6;else if(mx===g)hh=(b-r)/d+2;else hh=(r-g)/d+4;hh*=60;if(hh<0)hh+=360}return[hh,mx?d/mx:0,mx]}
+
+/* ---------- state ---------- */
+let P=null;               // project
+let curFrame=0,curLayer=0,tool='pencil',prevTool='pencil',color=h2p('000000'),brush=1,mirror=false,showGrid=false,onion=true,playing=false;
+const V={z:4,tx:0,ty:0};
+const dirty={frames:new Set(),meta:false,ref:false};
+let stored=new Set(),saveTimer=null;
+const hist=[];let histPos=0;
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+const vp=$('#vp'),stage=$('#stage'),refImg=$('#refImg'),onP=$('#onP'),onN=$('#onN'),cv=$('#cv'),gridCv=$('#grid'),strip=$('#strip');
+const ctx=cv.getContext('2d');
+let mainBuf,mainImg;
+
+function newProject(name,w,h){
+  return{id:'p'+uid(),name,w,h,fps:12,layers:[{name:'لایه ۱',visible:true}],
+    frames:[newFrame(w,h,1)],palette:DEFAULT_PALETTE.slice(),ref:null,updated:Date.now()};
+}
+function newFrame(w,h,layers){return{id:'f'+uid(),hold:1,cells:Array.from({length:layers},()=>new Uint32Array(w*h))}}
+
+/* ---------- rendering ---------- */
+function composite(fi,out){
+  const n=P.w*P.h,f=P.frames[fi];out=out||new Uint32Array(n);out.fill(0);
+  for(let l=0;l<P.layers.length;l++){if(!P.layers[l].visible)continue;const c=f.cells[l];for(let i=0;i<n;i++){const v=c[i];if(v)out[i]=v}}
+  return out;
+}
+let renderQ=false;
+function requestRender(){if(renderQ)return;renderQ=true;requestAnimationFrame(()=>{renderQ=false;renderMain()})}
+function renderMain(){composite(curFrame,mainBuf);ctx.putImageData(mainImg,0,0)}
+function renderOnion(){
+  const show=onion&&!playing;
+  for(const[c,off]of[[onP,-1],[onN,1]]){
+    const i=curFrame+off;
+    if(!show||i<0||i>=P.frames.length){c.style.display='none';continue}
+    c.style.display='block';const b=composite(i);
+    c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(b.buffer),P.w,P.h),0,0);
+  }
+}
+function applyView(){stage.style.transform=`translate(${V.tx}px,${V.ty}px) scale(${V.z})`;drawGrid()}
+function fitView(){
+  const vw=vp.clientWidth,vh=vp.clientHeight,m=Math.min(vw/P.w,vh/P.h)*0.94;
+  V.z=m>=1?Math.floor(m):m;V.tx=(vw-P.w*V.z)/2;V.ty=(vh-P.h*V.z)/2;applyView();
+}
+function drawGrid(){
+  const w=vp.clientWidth,hh=vp.clientHeight;
+  if(gridCv.width!==w||gridCv.height!==hh){gridCv.width=w;gridCv.height=hh}
+  const g=gridCv.getContext('2d');g.clearRect(0,0,w,hh);
+  if(!showGrid||!P||V.z<6)return;
+  g.strokeStyle='rgba(120,120,120,.55)';g.lineWidth=1;g.beginPath();
+  const y0=Math.max(0,V.ty),y1=Math.min(hh,V.ty+P.h*V.z),x0=Math.max(0,V.tx),x1=Math.min(w,V.tx+P.w*V.z);
+  for(let x=0;x<=P.w;x++){const sx=Math.round(V.tx+x*V.z)+.5;if(sx<0||sx>w)continue;g.moveTo(sx,y0);g.lineTo(sx,y1)}
+  for(let y=0;y<=P.h;y++){const sy=Math.round(V.ty+y*V.z)+.5;if(sy<0||sy>hh)continue;g.moveTo(x0,sy);g.lineTo(x1,sy)}
+  g.stroke();
+}
+function applyRef(){
+  const r=P.ref;
+  if(!r||!r.visible){refImg.style.display='none';return}
+  refImg.style.display='block';refImg.src=r.src;refImg.style.opacity=r.opacity;
+  refImg.style.transform=`translate(${r.ox}px,${r.oy}px) scale(${r.scale})`;refImg.style.transformOrigin='50% 50%';
+  refImg.style.zIndex=r.above?5:1;
+}
+
+/* ---------- history & saving ---------- */
+function pushHist(op){hist.length=histPos;hist.push(op);if(hist.length>200)hist.shift();histPos=hist.length;updUndo()}
+function updUndo(){$('#bUndo').disabled=histPos<=0;$('#bRedo').disabled=histPos>=hist.length}
+function undo(){if(playing||histPos<=0)return;hist[--histPos].undo();updUndo()}
+function redo(){if(playing||histPos>=hist.length)return;hist[histPos++].redo();updUndo()}
+function setSave(s){$('#saveInd').textContent=s}
+function touchFrame(f){if(f)dirty.frames.add(f.id);schedSave()}
+function touchMeta(){dirty.meta=true;schedSave()}
+function schedSave(){setSave('در حال ذخیره…');clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,1200)}
+function frameOfCell(c){return P.frames.find(f=>f.cells.includes(c))}
+function cellChanged(c){const f=frameOfCell(c);if(!f)return;touchFrame(f);const i=P.frames.indexOf(f);if(i===curFrame)requestRender();updateThumb(i);renderOnionSoon()}
+let onionT;function renderOnionSoon(){clearTimeout(onionT);onionT=setTimeout(renderOnion,60)}
+function pushDiff(cell,before){
+  const I=[],O=[],N=[];for(let i=0;i<cell.length;i++)if(cell[i]!==before[i]){I.push(i);O.push(before[i]);N.push(cell[i])}
+  if(!I.length)return false;
+  pushHist({undo(){for(let k=0;k<I.length;k++)cell[I[k]]=O[k];cellChanged(cell)},redo(){for(let k=0;k<I.length;k++)cell[I[k]]=N[k];cellChanged(cell)}});
+  return true;
+}
+const projRecord=()=>({id:P.id,name:P.name,w:P.w,h:P.h,fps:P.fps,layers:P.layers,palette:P.palette,
+  ref:P.ref?{opacity:P.ref.opacity,scale:P.ref.scale,ox:P.ref.ox,oy:P.ref.oy,above:P.ref.above,visible:P.ref.visible}:null,
+  frameList:P.frames.map(f=>({id:f.id,hold:f.hold})),updated:Date.now()});
+function thumbURL(){
+  const b=composite(0),c=document.createElement('canvas');c.width=P.w;c.height=P.h;
+  c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(b.buffer),P.w,P.h),0,0);
+  const m=Math.min(1,96/Math.max(P.w,P.h)),d=document.createElement('canvas');d.width=Math.max(1,Math.round(P.w*m));d.height=Math.max(1,Math.round(P.h*m));
+  const x=d.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(c,0,0,d.width,d.height);return d.toDataURL('image/png');
+}
+/* IndexedDB */
+let db=null;
+function idb(){return db?Promise.resolve(db):new Promise((res,rej)=>{const r=indexedDB.open('pixanim',1);
+  r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('meta',{keyPath:'id'});d.createObjectStore('projects',{keyPath:'id'});d.createObjectStore('frames')};
+  r.onsuccess=()=>{db=r.result;res(db)};r.onerror=()=>rej(r.error)})}
+const rq=r=>new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const txDone=t=>new Promise((res,rej)=>{t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)});
+async function dbMetaAll(){const d=await idb();return rq(d.transaction('meta').objectStore('meta').getAll())}
+async function dbLoad(id){
+  const d=await idb(),t=d.transaction(['projects','frames']),fs=t.objectStore('frames'),R=IDBKeyRange.bound(id+'/',id+'/\uffff');
+  const[rec,keys,vals,refSrc]=await Promise.all([rq(t.objectStore('projects').get(id)),rq(fs.getAllKeys(R)),rq(fs.getAll(R)),rq(fs.get(id+'#ref'))]);
+  if(!rec)return null;
+  return{rec,refSrc,frames:new Map(keys.map((k,i)=>[k.slice(id.length+1),vals[i]]))};
+}
+async function dbDelete(id){
+  const d=await idb(),t=d.transaction(['meta','projects','frames'],'readwrite');
+  t.objectStore('meta').delete(id);t.objectStore('projects').delete(id);
+  t.objectStore('frames').delete(IDBKeyRange.bound(id+'/',id+'/\uffff'));t.objectStore('frames').delete(id+'#ref');
+  return txDone(t);
+}
+async function saveNow(){
+  if(!P)return;clearTimeout(saveTimer);
+  if(!dirty.meta&&!dirty.frames.size&&!dirty.ref){setSave('ذخیره شد ✓');return}
+  const ids=[...dirty.frames],refD=dirty.ref;dirty.frames.clear();dirty.meta=false;dirty.ref=false;
+  try{
+    const d=await idb(),t=d.transaction(['meta','projects','frames'],'readwrite'),fs=t.objectStore('frames');
+    const live=new Map(P.frames.map(f=>[f.id,f]));
+    for(const id of ids){const f=live.get(id);if(f){fs.put({cells:f.cells},P.id+'/'+id);stored.add(id)}}
+    for(const id of[...stored])if(!live.has(id)){fs.delete(P.id+'/'+id);stored.delete(id)}
+    if(refD){if(P.ref)fs.put(P.ref.src,P.id+'#ref');else fs.delete(P.id+'#ref')}
+    const rec=projRecord();t.objectStore('projects').put(rec);
+    t.objectStore('meta').put({id:P.id,name:P.name,w:P.w,h:P.h,n:P.frames.length,updated:rec.updated,thumb:thumbURL()});
+    await txDone(t);setSave('ذخیره شد ✓');
+  }catch(err){
+    ids.forEach(i=>dirty.frames.add(i));dirty.meta=true;dirty.ref=dirty.ref||refD;
+    setSave('⚠ ذخیره نشد');toast('ذخیره‌سازی ناموفق بود؛ از فایل پشتیبان استفاده کن');
+  }
+}
+function markAllDirty(){P.frames.forEach(f=>dirty.frames.add(f.id));dirty.meta=true;dirty.ref=true;schedSave()}
+async function loadProject(id){
+  const data=await dbLoad(id);if(!data){toast('پروژه پیدا نشد');return false}
+  const{rec,frames,refSrc}=data,n=rec.w*rec.h;
+  P={id:rec.id,name:rec.name,w:rec.w,h:rec.h,fps:rec.fps,layers:rec.layers,palette:rec.palette,updated:rec.updated,
+    ref:rec.ref&&refSrc?{...rec.ref,src:refSrc}:null,
+    frames:rec.frameList.map(fl=>{const st=frames.get(fl.id),cells=st?st.cells:[];
+      while(cells.length<rec.layers.length)cells.push(new Uint32Array(n));return{id:fl.id,hold:fl.hold,cells}})};
+  stored=new Set(frames.keys());dirty.frames.clear();dirty.meta=dirty.ref=false;
+  resetUI();return true;
+}
+async function createProject(name,w,h){
+  if(P)await saveNow();
+  P=newProject(name,w,h);stored=new Set();markAllDirty();resetUI();await saveNow();
+}
+function resetUI(){
+  stopPlay();hist.length=0;histPos=0;curFrame=0;curLayer=0;updUndo();
+  const{w,h}=P;
+  for(const c of[cv,onP,onN]){c.width=w;c.height=h}
+  stage.style.width=w+'px';stage.style.height=h+'px';
+  mainBuf=new Uint32Array(w*h);mainImg=new ImageData(new Uint8ClampedArray(mainBuf.buffer),w,h);
+  $('#nameTxt').textContent=P.name;setSave('ذخیره شد ✓');
+  color=P.palette[0]??color;
+  buildPalette2();buildTimeline();updFps();applyRef();fitView();renderMain();renderOnion();
+  try{localStorage.setItem('pixanim.last',P.id)}catch(e){}
+}
+
+/* ---------- drawing ---------- */
+let cell=null,col=0,before=null,drawing=false,sx=0,sy=0,lx=0,ly=0;
+const inb=(x,y)=>x>=0&&y>=0&&x<P.w&&y<P.h;
+function put(x,y){if(inb(x,y))cell[y*P.w+x]=col}
+function putM(x,y){put(x,y);if(mirror)put(P.w-1-x,y)}
+function stamp(x,y){const o=brush>>1;for(let j=0;j<brush;j++)for(let i=0;i<brush;i++)putM(x-o+i,y-o+j)}
+function line(x0,y0,x1,y1,f){
+  const dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),stx=x0<x1?1:-1,sty=y0<y1?1:-1;let e=dx+dy;
+  for(;;){f(x0,y0);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=stx}if(e2<=dx){e+=dx;y0+=sty}}
+}
+function rectShape(x0,y0,x1,y1,fill){
+  const a=Math.min(x0,x1),b=Math.min(y0,y1),c=Math.max(x0,x1),d=Math.max(y0,y1);
+  if(fill){for(let y=b;y<=d;y++)for(let x=a;x<=c;x++)putM(x,y)}
+  else{line(a,b,c,b,stamp);line(a,d,c,d,stamp);line(a,b,a,d,stamp);line(c,b,c,d,stamp)}
+}
+function ellipseShape(x0,y0,x1,y1,fill){
+  const a0=Math.min(x0,x1),b0=Math.min(y0,y1),c0=Math.max(x0,x1),d0=Math.max(y0,y1);
+  const cx=(a0+c0)/2,cy=(b0+d0)/2,a=(c0-a0)/2+.5,b=(d0-b0)/2+.5;
+  for(let y=b0;y<=d0;y++)for(let x=a0;x<=c0;x++){
+    const dx=(x-cx)/a,dy=(y-cy)/b;if(dx*dx+dy*dy>1)continue;
+    if(fill){putM(x,y);continue}
+    const ia=a-1,ib=b-1;
+    if(ia>0&&ib>0){const ex=(x-cx)/ia,ey=(y-cy)/ib;if(ex*ex+ey*ey<1)continue}
+    stamp(x,y);
+  }
+}
+function flood(x,y,c){
+  if(!inb(x,y))return;const W=P.w,t=cell[y*W+x];if(t===c)return;
+  const st=[x+y*W];
+  while(st.length){const p=st.pop();if(cell[p]!==t)continue;const px=p%W;let l=p,r=p;
+    while(px-(p-l)>0&&cell[l-1]===t)l--;while(px+(r-p)<W-1&&cell[r+1]===t)r++;
+    for(let i=l;i<=r;i++){cell[i]=c;if(i>=W&&cell[i-W]===t)st.push(i-W);if(i<W*(P.h-1)&&cell[i+W]===t)st.push(i+W)}}
+}
+function pxPos(e){const r=cv.getBoundingClientRect();return[Math.floor((e.clientX-r.left)/r.width*P.w),Math.floor((e.clientY-r.top)/r.height*P.h)]}
+function setColor(c){color=c;$('#curCol').style.background='#'+p2h(c);buildPalette2()}
+function shapeDraw(x,y){
+  if(tool==='line')line(sx,sy,x,y,stamp);
+  else if(tool==='rect')rectShape(sx,sy,x,y,false);else if(tool==='rectfill')rectShape(sx,sy,x,y,true);
+  else if(tool==='circle')ellipseShape(sx,sy,x,y,false);else if(tool==='circlefill')ellipseShape(sx,sy,x,y,true);
+}
+const SHAPES=['line','rect','rectfill','circle','circlefill'];
+function strokeStart(e){
+  if(!P.layers[curLayer].visible){toast('این لایه مخفیه');return false}
+  const[x,y]=pxPos(e);
+  if(tool==='picker'){renderMain();if(inb(x,y)&&mainBuf[y*P.w+x]){setColor(mainBuf[y*P.w+x]);setTool(prevTool==='picker'?'pencil':prevTool)}return false}
+  cell=P.frames[curFrame].cells[curLayer];before=cell.slice();col=tool==='eraser'?0:color;sx=lx=x;sy=ly=y;
+  if(tool==='fill'){flood(x,y,color);finishStroke();return false}
+  if(tool==='pencil'||tool==='eraser')stamp(x,y);else if(SHAPES.includes(tool))shapeDraw(x,y);
+  drawing=true;requestRender();return true;
+}
+function strokeMove(e){
+  const[x,y]=pxPos(e);if(x===lx&&y===ly)return;
+  if(tool==='pencil'||tool==='eraser'){line(lx,ly,x,y,stamp)}
+  else if(SHAPES.includes(tool)){cell.set(before);shapeDraw(x,y)}
+  lx=x;ly=y;requestRender();
+}
+function finishStroke(){
+  drawing=false;if(!cell)return;
+  if(pushDiff(cell,before)){touchFrame(P.frames[curFrame]);updateThumb(curFrame)}
+  requestRender();renderOnionSoon();cell=null;before=null;
+}
+function cancelStroke(){if(drawing&&cell){cell.set(before);drawing=false;cell=null;before=null;requestRender()}}
+
+/* ---------- pointer / gestures ---------- */
+const ptrs=new Map();let gest=null,noDraw=false,spaceDown=false;
+function two(){const a=[...ptrs.values()];return[a[0],a[1]]}
+vp.addEventListener('pointerdown',e=>{
+  vp.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const r=vp.getBoundingClientRect();
+  if(ptrs.size===2){
+    cancelStroke();noDraw=true;
+    const[a,b]=two(),mx=(a.x+b.x)/2-r.left,my=(a.y+b.y)/2-r.top;
+    gest={type:'pinch',d0:Math.hypot(a.x-b.x,a.y-b.y)||1,z0:V.z,wx:(mx-V.tx)/V.z,wy:(my-V.ty)/V.z};
+  }else if(ptrs.size===1&&!noDraw){
+    if(tool==='pan'||playing||spaceDown||e.button===1)gest={type:'pan',x0:e.clientX,y0:e.clientY,tx0:V.tx,ty0:V.ty};
+    else strokeStart(e);
+  }
+});
+vp.addEventListener('pointermove',e=>{
+  const p=ptrs.get(e.pointerId);if(!p)return;p.x=e.clientX;p.y=e.clientY;
+  const r=vp.getBoundingClientRect();
+  if(gest&&gest.type==='pinch'&&ptrs.size>=2){
+    const[a,b]=two(),mx=(a.x+b.x)/2-r.left,my=(a.y+b.y)/2-r.top,d=Math.hypot(a.x-b.x,a.y-b.y);
+    V.z=clamp(gest.z0*d/gest.d0,.25,80);V.tx=mx-gest.wx*V.z;V.ty=my-gest.wy*V.z;applyView();
+  }else if(gest&&gest.type==='pan'&&ptrs.size===1){V.tx=gest.tx0+e.clientX-gest.x0;V.ty=gest.ty0+e.clientY-gest.y0;applyView()}
+  else if(drawing&&ptrs.size===1){
+    const ev=e.getCoalescedEvents?e.getCoalescedEvents():[];
+    if(ev.length>1)for(const c of ev)strokeMove(c);else strokeMove(e);
+  }
+});
+function ptrEnd(e){
+  if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);
+  if(drawing&&ptrs.size===0)finishStroke();
+  if(ptrs.size<2&&gest&&gest.type==='pinch')gest=null;
+  if(ptrs.size===0){gest=null;noDraw=false}
+}
+vp.addEventListener('pointerup',ptrEnd);vp.addEventListener('pointercancel',ptrEnd);
+function zoomAt(mx,my,f){const z=clamp(V.z*f,.25,80),wx=(mx-V.tx)/V.z,wy=(my-V.ty)/V.z;V.z=z;V.tx=mx-wx*z;V.ty=my-wy*z;applyView()}
+vp.addEventListener('wheel',e=>{e.preventDefault();const r=vp.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.15:1/1.15)},{passive:false});
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('gesturestart',e=>e.preventDefault());
+window.addEventListener('resize',()=>{if(P)fitView()});
+window.addEventListener('keydown',e=>{
+  if(/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName))return;
+  const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&k==='z'){e.shiftKey?redo():undo();e.preventDefault()}
+  else if((e.ctrlKey||e.metaKey)&&k==='y'){redo();e.preventDefault()}
+  else if(k===' '){spaceDown=true;e.preventDefault()}
+  else if(k==='b')setTool('pencil');else if(k==='e')setTool('eraser');else if(k==='g')setTool('fill');else if(k==='i')setTool('picker');
+  else if(k==='arrowleft')selectFrame(Math.max(0,curFrame-1));else if(k==='arrowright')selectFrame(Math.min(P.frames.length-1,curFrame+1));
+  else if(k==='enter')togglePlay();
+});
+window.addEventListener('keyup',e=>{if(e.key===' ')spaceDown=false});
+
+/* ---------- toolbar ---------- */
+const TOOLS=[['pencil','✏️','مداد'],['eraser','🧽','پاک‌کن'],['fill','🪣','سطل'],['picker','💧','رنگ‌چین'],['line','╱','خط'],['rect','▭','مربع'],['rectfill','▬','مربع پر'],['circle','◯','دایره'],['circlefill','⬤','دایره پر'],['pan','✋','جابه‌جایی']];
+const BRUSHES=[1,2,3,4,6,8];
+function buildTools(){
+  const bar=$('#tools');bar.innerHTML='';
+  for(const[id,ic,lb]of TOOLS)bar.append(h('button',{class:'tb'+(tool===id?' on':''),'data-t':id,onclick:()=>setTool(id)},h('i',null,ic),lb));
+  bar.append(h('div',{class:'sep'}));
+  bar.append(h('button',{class:'tb',id:'tBrush',onclick:()=>{brush=BRUSHES[(BRUSHES.indexOf(brush)+1)%BRUSHES.length];buildTools()}},h('i',null,String(brush)),'اندازه'));
+  bar.append(h('button',{class:'tb'+(mirror?' on':''),onclick:()=>{mirror=!mirror;buildTools()}},h('i',null,'⇋'),'آینه'));
+  bar.append(h('button',{class:'tb'+(showGrid?' on':''),onclick:()=>{showGrid=!showGrid;buildTools();drawGrid()}},h('i',null,'▦'),'شبکه'));
+  bar.append(h('button',{class:'tb'+(onion?' on':''),onclick:()=>{onion=!onion;buildTools();renderOnion()}},h('i',null,'🧅'),'پوست‌پیاز'));
+  bar.append(h('div',{class:'sep'}));
+  bar.append(h('button',{class:'tb',onclick:layersSheet},h('i',null,'🗂'),'لایه‌ها'));
+  bar.append(h('button',{class:'tb'+(P&&P.ref&&P.ref.visible?' on':''),onclick:refSheet},h('i',null,'🖼'),'عکس مرجع'));
+}
+function setTool(t){if(t!=='picker')prevTool=t;tool=t;buildTools()}
+
+/* ---------- palette & picker ---------- */
+function buildPalette2(){
+  if(!P)return;const pal=$('#pal');pal.innerHTML='';
+  $('#curCol').style.background='#'+p2h(color);
+  P.palette.forEach((c,i)=>{
+    const el=h('div',{class:'sw'+(c===color?' sel':''),style:'background:#'+p2h(c)});
+    let t=null,long=false;
+    el.addEventListener('pointerdown',()=>{long=false;t=setTimeout(async()=>{long=true;if(P.palette.length>1&&await askConfirm('این رنگ از پالت حذف بشه؟','حذف')){P.palette.splice(i,1);touchMeta();buildPalette2()}},650)});
+    el.addEventListener('pointerup',()=>{clearTimeout(t);if(!long){setColor(c)}});
+    el.addEventListener('pointerleave',()=>clearTimeout(t));
+    pal.append(el);
+  });
+}
+$('#curCol').addEventListener('click',()=>pickerSheet());
+$('#bAddCol').addEventListener('click',()=>{if(!P.palette.includes(color)){P.palette.push(color);touchMeta();buildPalette2();toast('به پالت اضافه شد')}else toast('این رنگ توی پالت هست')});
+function pickerSheet(){
+  let[hh,s,v]=rgb2hsv(color&255,(color>>8)&255,(color>>16)&255);
+  sheet('انتخاب رنگ',(b,close)=>{
+    const c=h('canvas',{id:'svc',width:256,height:170}),x=c.getContext('2d');
+    const hue=h('input',{type:'range',id:'hue',min:0,max:359,value:Math.round(hh)});
+    const hex=h('input',{type:'text',value:p2h(color),maxlength:7,dir:'ltr'});
+    function draw(){
+      x.fillStyle=`hsl(${hh},100%,50%)`;x.fillRect(0,0,256,170);
+      let g=x.createLinearGradient(0,0,256,0);g.addColorStop(0,'#fff');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,256,170);
+      g=x.createLinearGradient(0,0,0,170);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'#000');x.fillStyle=g;x.fillRect(0,0,256,170);
+      x.strokeStyle='#fff';x.lineWidth=2;x.beginPath();x.arc(s*256,(1-v)*170,7,0,7);x.stroke();x.strokeStyle='#000';x.lineWidth=1;x.beginPath();x.arc(s*256,(1-v)*170,8.5,0,7);x.stroke();
+    }
+    function apply(){const[r,g,bb]=hsv2rgb(hh,s,v);const p=h2p([r,g,bb].map(n=>n.toString(16).padStart(2,'0')).join(''));setColor(p);hex.value=p2h(p);draw()}
+    const move=e=>{const r=c.getBoundingClientRect();s=clamp((e.clientX-r.left)/r.width,0,1);v=1-clamp((e.clientY-r.top)/r.height,0,1);apply()};
+    let dn=false;c.addEventListener('pointerdown',e=>{dn=true;c.setPointerCapture(e.pointerId);move(e)});
+    c.addEventListener('pointermove',e=>{if(dn)move(e)});c.addEventListener('pointerup',()=>dn=false);
+    hue.addEventListener('input',()=>{hh=+hue.value;apply()});
+    hex.addEventListener('input',()=>{const t=hex.value.replace('#','');if(/^[0-9a-fA-F]{6}$/.test(t)){const p=h2p(t);[hh,s,v]=rgb2hsv(p&255,(p>>8)&255,(p>>16)&255);hue.value=Math.round(hh);setColor(p);draw()}});
+    draw();
+    b.append(c,hue,hex,h('div',{class:'row'},
+      h('button',{onclick:()=>{if(!P.palette.includes(color)){P.palette.push(color);touchMeta();buildPalette2()}toast('به پالت اضافه شد')}},'＋ افزودن به پالت'),
+      h('button',{class:'on',onclick:close},'تأیید')),
+      h('div',{class:'hint'},'برای حذف یک رنگ از پالت، روش انگشت رو نگه دار.'));
+  });
+}
+
+/* ---------- timeline ---------- */
+let thumbs=[],selEl=null;
+const TH=56;
+function thumbDims(){const m=Math.max(P.w,P.h),k=TH/m;return[Math.max(1,Math.round(P.w*k)),Math.max(1,Math.round(P.h*k))]}
+function buildTimeline(){
+  strip.innerHTML='';thumbs=[];const[tw,th]=thumbDims();
+  P.frames.forEach((f,i)=>{
+    const kk=Math.min(1,96/Math.max(P.w,P.h)),c=h('canvas',{width:Math.max(1,Math.round(P.w*kk)),height:Math.max(1,Math.round(P.h*kk))});c.style.width=tw+'px';c.style.height=th+'px';
+    const lb=h('div',null,String(i+1)),el=h('div',{class:'fr',onclick:()=>{if(!playing)selectFrame(i)}},c,lb);
+    strip.append(el);thumbs.push({el,c,lb});
+  });
+  P.frames.forEach((f,i)=>updateThumb(i));
+  markSel();
+}
+function updLabel(i){const t=thumbs[i];if(t)t.lb.textContent=(i+1)+(P.frames[i].hold>1?' ×'+P.frames[i].hold:'')}
+let tcv=null;
+function updateThumb(i){
+  const t=thumbs[i];if(!t)return;
+  if(!tcv){tcv=document.createElement('canvas')}
+  if(tcv.width!==P.w||tcv.height!==P.h){tcv.width=P.w;tcv.height=P.h}
+  const b=composite(i);tcv.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(b.buffer),P.w,P.h),0,0);
+  const g=t.c.getContext('2d');g.clearRect(0,0,t.c.width,t.c.height);g.imageSmoothingEnabled=false;g.drawImage(tcv,0,0,t.c.width,t.c.height);
+  updLabel(i);
+}
+function markSel(){
+  if(selEl)selEl.classList.remove('sel');const t=thumbs[curFrame];if(!t)return;selEl=t.el;selEl.classList.add('sel');
+  const l=t.el.offsetLeft-strip.clientWidth/2+t.el.clientWidth/2;strip.scrollLeft=l;
+}
+function selectFrame(i){curFrame=clamp(i,0,P.frames.length-1);markSel();renderMain();renderOnion()}
+function afterStruct(sel,touched){
+  buildTimeline();if(touched)touchFrame(touched);else schedSave();touchMeta();
+  curFrame=clamp(sel,0,P.frames.length-1);markSel();renderMain();renderOnion();
+}
+function addFrame(kind){
+  if(playing)return;
+  const src=P.frames[curFrame],at=curFrame+1;
+  const fr=kind==='dup'?{id:'f'+uid(),hold:src.hold,cells:src.cells.map(c=>c.slice())}:newFrame(P.w,P.h,P.layers.length);
+  const op={undo(){P.frames.splice(at,1);afterStruct(at-1)},redo(){P.frames.splice(at,0,fr);afterStruct(at,fr)}};
+  op.redo();pushHist(op);
+}
+function delFrame(){
+  if(playing)return;
+  if(P.frames.length===1){clearFrame();return}
+  const at=curFrame,fr=P.frames[at];
+  const op={undo(){P.frames.splice(at,0,fr);afterStruct(at,fr)},redo(){P.frames.splice(at,1);afterStruct(Math.min(at,P.frames.length-1))}};
+  op.redo();pushHist(op);
+}
+function moveFrame(d){
+  if(playing)return;const a=curFrame,b=a+d;if(b<0||b>=P.frames.length)return;
+  const op={undo(){[P.frames[a],P.frames[b]]=[P.frames[b],P.frames[a]];afterStruct(a)},redo(){[P.frames[a],P.frames[b]]=[P.frames[b],P.frames[a]];afterStruct(b)}};
+  op.redo();pushHist(op);
+}
+function clearFrame(){
+  if(playing)return;const c=P.frames[curFrame].cells[curLayer],b=c.slice();c.fill(0);
+  if(pushDiff(c,b)){touchFrame(P.frames[curFrame]);updateThumb(curFrame);requestRender();renderOnionSoon()}
+}
+function holdAdj(d){const f=P.frames[curFrame];f.hold=clamp(f.hold+d,1,48);updLabel(curFrame);$('#holdV').textContent=f.hold;touchMeta()}
+function updFps(){$('#fpsV').textContent=P.fps;$('#holdV').textContent=P.frames[curFrame].hold}
+function fpsAdj(d){P.fps=clamp(P.fps+d,1,60);updFps();touchMeta()}
+function buildTlCtl(){
+  const c=$('#tlCtl');
+  c.append(
+    h('button',{class:'on',id:'bPlay',onclick:togglePlay,style:'min-width:70px'},'▶ پخش'),
+    h('div',{class:'grp'},'FPS',h('button',{onclick:()=>fpsAdj(-1)},'−'),h('b',{id:'fpsV'},'12'),h('button',{onclick:()=>fpsAdj(1)},'+')),
+    h('button',{onclick:()=>addFrame('blank')},'➕ فریم'),h('button',{onclick:()=>addFrame('dup')},'⧉ کپی'),h('button',{class:'danger',onclick:delFrame},'🗑 حذف'),
+    h('button',{onclick:()=>moveFrame(-1)},'◀'),h('button',{onclick:()=>moveFrame(1)},'▶'),
+    h('div',{class:'grp'},'نگه‌داشتن',h('button',{onclick:()=>holdAdj(-1)},'−'),h('b',{id:'holdV'},'1'),h('button',{onclick:()=>holdAdj(1)},'+')),
+    h('button',{onclick:clearFrame},'🧹 پاک')
+  );
+}
+/* playback */
+let playTimer=null;
+function togglePlay(){playing?stopPlay():startPlay()}
+function startPlay(){
+  if(!P||playing)return;playing=true;$('#bPlay').textContent='⏸ توقف';renderOnion();let i=curFrame;
+  const step=()=>{if(!playing)return;curFrame=i;markSel();renderMain();const d=P.frames[i].hold*1000/P.fps;i=(i+1)%P.frames.length;playTimer=setTimeout(step,d)};
+  step();
+}
+function stopPlay(){if(!playing)return;playing=false;clearTimeout(playTimer);const b=$('#bPlay');if(b)b.textContent='▶ پخش';renderMain();renderOnion()}
+
+/* ---------- layers ---------- */
+function layersSheet(){
+  sheet('لایه‌ها',(b,close)=>{
+    const list=h('div',{style:'display:flex;flex-direction:column;gap:6px'});b.append(list);
+    function draw(){
+      list.innerHTML='';
+      for(let i=P.layers.length-1;i>=0;i--){
+        const L=P.layers[i];
+        list.append(h('div',{class:'lrow'+(i===curLayer?' sel':'')},
+          h('button',{onclick:()=>{L.visible=!L.visible;touchMeta();requestRender();renderOnion();P.frames.forEach((f,k)=>updateThumb(k));draw()}},L.visible?'👁':'—'),
+          h('div',{class:'nm',onclick:()=>{curLayer=i;draw()}},L.name),
+          h('button',{onclick:async()=>{const n=await askText('نام لایه',L.name);if(n){L.name=n;touchMeta();draw()}}},'✎'),
+          h('button',{disabled:i===P.layers.length-1,onclick:()=>moveLayer(i,1,draw)},'↑'),
+          h('button',{disabled:i===0,onclick:()=>moveLayer(i,-1,draw)},'↓'),
+          h('button',{class:'danger',onclick:async()=>{if(P.layers.length<2){toast('حداقل یه لایه لازمه');return}
+            if(!await askConfirm('لایه «'+L.name+'» با همه فریم‌هاش حذف بشه؟ (قابل برگشت نیست)','حذف'))return;
+            P.layers.splice(i,1);P.frames.forEach(f=>f.cells.splice(i,1));curLayer=clamp(curLayer,0,P.layers.length-1);hist.length=0;histPos=0;updUndo();
+            markAllDirty();requestRender();renderOnion();P.frames.forEach((f,k)=>updateThumb(k));draw()}},'🗑')));
+      }
+    }
+    draw();
+    b.append(h('button',{class:'on',onclick:()=>{
+      P.layers.push({name:'لایه '+(P.layers.length+1),visible:true});P.frames.forEach(f=>f.cells.push(new Uint32Array(P.w*P.h)));
+      curLayer=P.layers.length-1;hist.length=0;histPos=0;updUndo();markAllDirty();draw()}},'＋ لایه جدید'),
+      h('div',{class:'hint'},'لایه‌ی بالاتر روی لایه‌های پایین‌تر نشون داده می‌شه. روی اسم لایه بزن تا فعال بشه.'));
+  });
+}
+function moveLayer(i,d,cb){
+  const j=i+d;if(j<0||j>=P.layers.length)return;
+  [P.layers[i],P.layers[j]]=[P.layers[j],P.layers[i]];P.frames.forEach(f=>{[f.cells[i],f.cells[j]]=[f.cells[j],f.cells[i]]});
+  if(curLayer===i)curLayer=j;else if(curLayer===j)curLayer=i;
+  hist.length=0;histPos=0;updUndo();markAllDirty();requestRender();renderOnion();P.frames.forEach((f,k)=>updateThumb(k));cb();
+}
+
+/* ---------- reference image ---------- */
+$('#fileRef').addEventListener('change',e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const url=URL.createObjectURL(f),img=new Image();
+  img.onload=()=>{
+    const m=Math.min(1,1600/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*m);c.height=Math.round(img.height*m);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+    P.ref={src:c.toDataURL(f.type==='image/png'?'image/png':'image/jpeg',.9),opacity:.45,scale:1,ox:0,oy:0,above:false,visible:true};
+    dirty.ref=true;touchMeta();applyRef();buildTools();document.querySelectorAll('.back').forEach(e=>e.remove());refSheet();
+  };
+  img.onerror=()=>toast('عکس باز نشد');img.src=url;
+});
+function refSheet(){
+  sheet('عکس مرجع',(b,close)=>{
+    function draw(){
+      b.innerHTML='';const r=P.ref;
+      b.append(h('button',{class:'on',onclick:()=>$('#fileRef').click()},r?'تعویض عکس':'انتخاب عکس از گالری'));
+      if(!r){b.append(h('div',{class:'hint'},'یه عکس بذار زیر بوم، شفافیتش رو کم کن و روش با پیکسل بکش.'));return}
+      const sl=(lab,min,max,step,key,fmt)=>[h('div',{class:'lab'},lab),h('input',{type:'range',min,max,step,value:r[key],oninput:e=>{r[key]=+e.target.value;applyRef();touchMeta()}})];
+      b.append(...sl('شفافیت',0,1,.01,'opacity'),...sl('اندازه',.1,4,.01,'scale'),...sl('جابه‌جایی افقی',-P.w,P.w,1,'ox'),...sl('جابه‌جایی عمودی',-P.h,P.h,1,'oy'));
+      b.append(h('div',{class:'row'},
+        h('button',{class:r.visible?'on':'',onclick:()=>{r.visible=!r.visible;applyRef();buildTools();touchMeta();draw()}},r.visible?'نمایش: روشن':'نمایش: خاموش'),
+        h('button',{class:r.above?'on':'',onclick:()=>{r.above=!r.above;applyRef();touchMeta();draw()}},r.above?'روی نقاشی':'زیر نقاشی')),
+        h('button',{class:'danger',onclick:()=>{P.ref=null;dirty.ref=true;touchMeta();applyRef();buildTools();draw()}},'حذف عکس'));
+    }
+    draw();
+  });
+}
+/* ---------- project manager ---------- */
+function fmtDate(t){try{return new Date(t).toLocaleString('fa-IR',{dateStyle:'short',timeStyle:'short'})}catch(e){return''}}
+async function projectsSheet(){
+  const metas=(await dbMetaAll().catch(()=>[])).sort((a,b)=>b.updated-a.updated);
+  sheet('پروژه‌ها',(b,close)=>{
+    let nw=64,nh=64;
+    const nameI=h('input',{type:'text',value:'انیمیشن جدید'}),wI=h('input',{type:'number',min:8,max:512,value:64,dir:'ltr'}),hI=h('input',{type:'number',min:8,max:512,value:64,dir:'ltr'});
+    const preset=n=>h('button',{onclick:()=>{wI.value=n;hI.value=n}},n+'×'+n);
+    b.append(h('div',{class:'lab'},'پروژه جدید'),nameI,
+      h('div',{class:'row'},preset(32),preset(64),preset(128),preset(256)),
+      h('div',{class:'row'},h('div',null,'عرض',wI),h('div',null,'ارتفاع',hI)),
+      h('button',{class:'on',onclick:async()=>{
+        const w=clamp(parseInt(wI.value)||64,8,512),hh=clamp(parseInt(hI.value)||64,8,512);close();
+        await createProject(nameI.value.trim()||'بدون نام',w,hh);toast('پروژه ساخته شد')}},'ساخت پروژه'),
+      h('div',{class:'hint'},'اندازه‌ی بوم بعد از ساخت قابل تغییر نیست. برای شروع ۶۴×۶۴ یا ۱۲۸×۱۲۸ خوبه.'),
+      h('div',{class:'row'},
+        h('button',{onclick:()=>{$('#fileProj').click()}},'📂 وارد کردن فایل پروژه'),
+        h('button',{onclick:async()=>{await saveNow();close();exportProjectFile()}},'💾 فایل پشتیبان پروژه فعلی')),
+      h('div',{class:'lab'},'پروژه‌های ذخیره‌شده'));
+    if(!metas.length)b.append(h('div',{class:'hint'},'هنوز چیزی ذخیره نشده.'));
+    for(const m of metas){
+      b.append(h('div',{class:'card'},h('img',{src:m.thumb,alt:''}),
+        h('div',{class:'t'},h('div',null,m.name+(P&&P.id===m.id?' (باز)':'')),h('small',null,`${m.w}×${m.h} • ${m.n} فریم • ${fmtDate(m.updated)}`)),
+        h('button',{class:'on',onclick:async()=>{close();await saveNow();await loadProject(m.id)}},'باز کن'),
+        h('button',{class:'danger',onclick:async()=>{
+          if(!await askConfirm('پروژه «'+m.name+'» برای همیشه پاک بشه؟','پاک کن'))return;
+          await dbDelete(m.id);if(P&&P.id===m.id){close();await startup(true)}else{close();projectsSheet()}}},'🗑')));
+    }
+  });
+}
+$('#bMenu').addEventListener('click',projectsSheet);
+$('#nameBtn').addEventListener('click',async()=>{const n=await askText('نام پروژه',P.name);if(n){P.name=n;$('#nameTxt').textContent=n;touchMeta()}});
+$('#bUndo').addEventListener('click',undo);$('#bRedo').addEventListener('click',redo);$('#bFit').addEventListener('click',fitView);$('#bExport').addEventListener('click',()=>{stopPlay();exportSheet()});
+
+/* project file */
+const u32b64=a=>{const u=new Uint8Array(a.buffer,a.byteOffset,a.byteLength);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)};
+const b64u32=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new Uint32Array(u.buffer)};
+async function projectBlob(){
+  const o={format:'pixanim',v:1,name:P.name,w:P.w,h:P.h,fps:P.fps,layers:P.layers,palette:P.palette,ref:P.ref,frames:P.frames.map(f=>({hold:f.hold,cells:f.cells.map(u32b64)}))};
+  const raw=new Blob([JSON.stringify(o)]);
+  if(window.CompressionStream)return new Response(raw.stream().pipeThrough(new CompressionStream('gzip'))).blob();
+  return raw;
+}
+async function exportProjectFile(){
+  const blob=await projectBlob();offerFile(blob,(P.name||'project')+'.pixanim','فایل پروژه');
+}
+$('#fileProj').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{
+    const u=new Uint8Array(await f.arrayBuffer());let text;
+    if(u[0]===0x1f&&u[1]===0x8b){text=await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text()}else text=new TextDecoder().decode(u);
+    const o=JSON.parse(text);if(o.format!=='pixanim')throw 0;
+    await saveNow();
+    P={id:'p'+uid(),name:o.name+' (واردشده)',w:o.w,h:o.h,fps:o.fps||12,layers:o.layers,palette:o.palette,ref:o.ref,updated:Date.now(),
+      frames:o.frames.map(fr=>({id:'f'+uid(),hold:fr.hold||1,cells:fr.cells.map(b64u32)}))};
+    stored=new Set();markAllDirty();resetUI();await saveNow();toast('پروژه وارد شد');
+  }catch(err){toast('این فایل پروژه معتبر نیست')}
+});
+
+/* ---------- export ---------- */
+function offerFile(blob,name,label){
+  sheet(label||'فایل آماده است',(b,close)=>{
+    const url=URL.createObjectURL(blob),mb=(blob.size/1048576).toFixed(2);
+    b.append(h('div',null,`${name} — ${mb} مگابایت`),
+      h('a',{href:url,download:name,style:'text-decoration:none'},h('button',{class:'on',style:'width:100%'},'⬇ ذخیره فایل')));
+    try{const file=new File([blob],name,{type:blob.type});
+      if(navigator.canShare&&navigator.canShare({files:[file]}))b.append(h('button',{onclick:()=>navigator.share({files:[file],title:name}).catch(()=>{})},'↗ اشتراک‌گذاری / ذخیره در گالری'))}catch(e){}
+    b.append(h('div',{class:'hint'},'اگه دکمه‌ی ذخیره کار نکرد، از اشتراک‌گذاری استفاده کن.'));
+  });
+}
+function frameCanvas(i,s,bg){
+  const c=document.createElement('canvas');c.width=P.w;c.height=P.h;const buf=composite(i);
+  if(bg)for(let k=0;k<buf.length;k++)if(!buf[k])buf[k]=bg;
+  c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(buf.buffer),P.w,P.h),0,0);
+  if(s===1)return c;const d=document.createElement('canvas');d.width=P.w*s;d.height=P.h*s;const g=d.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(c,0,0,d.width,d.height);return d;
+}
+const toBlob=(c,t='image/png')=>new Promise(r=>c.toBlob(r,t));
+const bgVal=b=>b==='white'?0xffffffff:b==='black'?0xff000000:0;
+function exportSheet(){
+  sheet('خروجی',(b,close)=>{
+    const opts=[1,2,4,8,16];let sc=opts.reduce((a,c)=>Math.abs(c*Math.max(P.w,P.h)-512)<Math.abs(a*Math.max(P.w,P.h)-512)?c:a,1);
+    const fmt=h('select',null,h('option',{value:'gif'},'GIF متحرک'),h('option',{value:'video'},'ویدیو (MP4 / WebM)'),h('option',{value:'zip'},'ZIP دنباله‌ی PNG'),h('option',{value:'sheet'},'اسپرایت‌شیت PNG'),h('option',{value:'png'},'PNG فریم فعلی'),h('option',{value:'proj'},'فایل پروژه (پشتیبان)'));
+    const scS=h('select',null,opts.map(o=>h('option',{value:o,selected:o===sc},o+'×')));
+    const bgS=h('select',null,h('option',{value:'none'},'شفاف'),h('option',{value:'white'},'سفید'),h('option',{value:'black'},'مشکی'));
+    const exp=h('input',{type:'checkbox',checked:true});
+    const info=h('div',{class:'hint'}),prog=h('div',{class:'prog'},h('div')),msg=h('div',{class:'hint'});
+    const go=h('button',{class:'on'},'ساخت خروجی'),cancel=h('button',{style:'display:none'},'لغو');
+    let stop=false;cancel.onclick=()=>{stop=true};
+    const upd=()=>{const s=+scS.value;info.textContent=`اندازه‌ی خروجی: ${P.w*s}×${P.h*s} پیکسل • ${P.frames.length} فریم`+(fmt.value==='video'?' • ویدیو به‌صورت زنده ضبط می‌شه؛ مدت انتظار ≈ طول انیمیشنه.':'')};
+    fmt.onchange=scS.onchange=upd;upd();
+    const setP=(t,f)=>{msg.textContent=t;prog.firstChild.style.width=Math.round(f*100)+'%'};
+    b.append(h('div',{class:'lab'},'قالب'),fmt,h('div',{class:'lab'},'بزرگ‌نمایی'),scS,h('div',{class:'lab'},'پس‌زمینه'),bgS,
+      h('label',{class:'row',style:'gap:6px'},exp,h('span',{style:'flex:1'},'فریم‌های «نگه‌داشته‌شده» تکرار بشن (برای ZIP)')),info,go,cancel,prog,msg);
+    go.onclick=async()=>{
+      stop=false;go.disabled=true;cancel.style.display='';const s=+scS.value,bg=bgVal(bgS.value),f=fmt.value;
+      try{
+        let res=null;
+        if(f==='gif')res=await expGif(s,bg,setP,()=>stop);
+        else if(f==='video')res=await expVideo(s,bg,setP,()=>stop);
+        else if(f==='zip')res=await expZip(s,bg,exp.checked,setP,()=>stop);
+        else if(f==='sheet')res=await expSheet(s,bg);
+        else if(f==='png')res={blob:await toBlob(frameCanvas(curFrame,s,bg)),name:P.name+'-frame'+(curFrame+1)+'.png'};
+        else if(f==='proj')res={blob:await projectBlob(),name:P.name+'.pixanim'};
+        if(res){close();offerFile(res.blob,res.name)}
+      }catch(err){if(err==='cancel')setP('لغو شد',0);else{console.error(err);setP('خطا: '+(err&&err.message||err),0)}}
+      go.disabled=false;cancel.style.display='none';
+    };
+  });
+}
+async function expGif(s,bg,setP,stopped){
+  const n=P.frames.length,counts=new Map();let hasT=false;
+  for(let i=0;i<n;i++){
+    const c=composite(i);
+    for(let k=0;k<c.length;k++){let v=c[k];if(!v){if(bg)v=bg;else{hasT=true;continue}}counts.set(v,(counts.get(v)||0)+1)}
+    if(i%20===0){setP('بررسی رنگ‌ها…',i/n*.3);await sleep(0);if(stopped())throw'cancel'}
+  }
+  const q=buildPalette(counts,hasT),W=P.w*s,H=P.h*s,g=new GifWriter(W,H,q.palette,q.trans);
+  for(let i=0;i<n;i++){
+    const c=composite(i),idx=new Uint8Array(c.length);
+    for(let k=0;k<c.length;k++){let v=c[k];if(!v){if(bg)v=bg;else{idx[k]=q.trans;continue}}idx[k]=q.idxOf(v)}
+    g.add(scaleIdx(idx,P.w,P.h,s),Math.round(P.frames[i].hold*100/P.fps));
+    if(i%4===0){setP(`ساخت GIF… ${i+1}/${n}`,.3+.7*i/n);await sleep(0);if(stopped())throw'cancel'}
+  }
+  return{blob:g.finish(),name:P.name+'.gif'};
+}
+async function expZip(s,bg,expand,setP,stopped){
+  const files=[],order=[];P.frames.forEach((f,i)=>{const k=expand?f.hold:1;for(let j=0;j<k;j++)order.push(i)});
+  const cache=new Map(),pad=String(order.length).length<4?4:String(order.length).length;
+  for(let n=0;n<order.length;n++){
+    const i=order[n];let data=cache.get(i);
+    if(!data){data=new Uint8Array(await(await toBlob(frameCanvas(i,s,bg))).arrayBuffer());if(expand)cache.set(i,data)}
+    files.push({name:'frame_'+String(n+1).padStart(pad,'0')+'.png',data});
+    if(n%5===0){setP(`ساخت PNG… ${n+1}/${order.length}`,n/order.length);await sleep(0);if(stopped())throw'cancel'}
+  }
+  return{blob:makeZip(files),name:P.name+'-frames.zip'};
+}
+async function expSheet(s,bg){
+  const n=P.frames.length,cols=Math.ceil(Math.sqrt(n)),rows=Math.ceil(n/cols),c=document.createElement('canvas');c.width=cols*P.w*s;c.height=rows*P.h*s;
+  if(c.width*c.height>1.6e8)throw new Error('اسپرایت‌شیت خیلی بزرگ می‌شه؛ بزرگ‌نمایی رو کمتر کن');
+  const g=c.getContext('2d');
+  for(let i=0;i<n;i++)g.drawImage(frameCanvas(i,s,bg),(i%cols)*P.w*s,Math.floor(i/cols)*P.h*s);
+  return{blob:await toBlob(c),name:P.name+'-sheet.png'};
+}
+async function expVideo(s,bg,setP,stopped){
+  if(!window.MediaRecorder)throw new Error('این مرورگر ضبط ویدیو رو پشتیبانی نمی‌کنه؛ از GIF یا ZIP استفاده کن');
+  const sc=Math.max(s,Math.ceil(480/Math.max(P.w,P.h))),cw=P.w*sc+(P.w*sc%2),ch=P.h*sc+(P.h*sc%2);
+  const c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');x.imageSmoothingEnabled=false;
+  const bgc='#'+p2h(bg||0xff000000);
+  const draw=i=>{x.fillStyle=bgc;x.fillRect(0,0,cw,ch);x.drawImage(frameCanvas(i,1,0),0,0,P.w*sc,P.h*sc)};
+  draw(0);
+  const stream=c.captureStream(P.fps),types=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+  const mime=types.find(t=>MediaRecorder.isTypeSupported(t));if(!mime)throw new Error('قالب ویدیویی پشتیبانی‌شده‌ای پیدا نشد');
+  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8e6}),chunks=[];
+  rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  const done=new Promise(r=>rec.onstop=r);rec.start(500);
+  let t=performance.now(),total=P.frames.reduce((a,f)=>a+f.hold,0)/P.fps,el=0;
+  try{
+    for(let i=0;i<P.frames.length;i++){
+      draw(i);const d=P.frames[i].hold*1000/P.fps;t+=d;
+      while(performance.now()<t){await sleep(Math.min(40,Math.max(1,t-performance.now())));if(stopped())throw'cancel'}
+      el+=d/1000;setP(`ضبط ویدیو… ${el.toFixed(1)} از ${total.toFixed(1)} ثانیه`,el/total);
+    }
+    await sleep(200);
+  }finally{if(rec.state!=='inactive')rec.stop()}
+  await done;stream.getTracks().forEach(tr=>tr.stop());
+  const type=mime.split(';')[0];return{blob:new Blob(chunks,{type}),name:P.name+(type==='video/mp4'?'.mp4':'.webm')};
+}
+
+/* ---------- startup ---------- */
+async function startup(forceMenu){
+  buildTools();
+  let ok=false;
+  try{
+    const last=localStorage.getItem('pixanim.last');
+    if(last&&!forceMenu)ok=await loadProject(last);
+    if(!ok){
+      const metas=await dbMetaAll();
+      if(metas.length&&!forceMenu)ok=await loadProject(metas.sort((a,b)=>b.updated-a.updated)[0].id);
+    }
+  }catch(e){setSave('⚠ ذخیره‌سازی در دسترس نیست')}
+  if(!ok){
+    P=newProject('انیمیشن اول',64,64);stored=new Set();resetUI();markAllDirty();
+    toast('با دو انگشت زوم کن و جابه‌جا شو',3200);
+  }
+  buildTools();
+}
+buildTlCtl();
+document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow()});
+window.addEventListener('pagehide',()=>{saveNow()});
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+startup();
+</script>
+</body>
+</html>
